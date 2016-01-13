@@ -7,8 +7,10 @@
 // Indices for matrices in the scene
 #define I_MVP 		0
 #define I_MV  		1
-#define I_MV_LIGHT  2
-#define I_NM		3
+#define I_M  		2
+#define I_V  		2
+#define I_MV_LIGHT  3
+#define I_NM		4
 
 #include <glm/vec3.hpp>
 

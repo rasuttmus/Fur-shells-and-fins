@@ -1,10 +1,9 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_inverse.hpp>
 
 #include "../include/Geometry.h"
+#include "../include/Camera.h"
 
 
 class Scene {
@@ -25,11 +24,7 @@ private:
 
 	// Instance varialbes
 
-	glm::mat4 mProjectionMatrix;
-
-	glm::mat4 mViewMatrix;
-
-	glm::mat4 mModelMatrix;
+	Camera * mCamera = nullptr;
 
 
 	// Containers

@@ -1,6 +1,8 @@
 #include "../include/Geometry.h"
 
-Geometry::Geometry(std::string s) {
+Geometry::Geometry(std::string s, glm::vec3 c) {
+
+	mMaterial.color = c;
 
 	std::string obj = PATH_OBJ + s + FILE_NAME_OBJ;
 
@@ -10,21 +12,143 @@ Geometry::Geometry(std::string s) {
 
 Geometry::~Geometry() {
 
+	glDeleteBuffers(1, &vertexBuffer);
+	glDeleteBuffers(1, &uvBuffer);
+	glDeleteBuffers(1, &normalBuffer);
+	glDeleteProgram(shaderProgram);
+	glDeleteVertexArrays(1, &vertexArrayID);
+
 	std::cout << "\nGeometry destroyed!\n" << std::endl;
 }
 
 
-void Geometry::initialize(glm::vec3 lightPosition) {
+void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
 
 	buildRenderData();
 
 	glGenVertexArrays(1, &vertexArrayID);
     glBindVertexArray(vertexArrayID);
+
+    shaderProgram = LoadShaders("shaders/phongvertexshader.glsl", "shaders/phongfragmentshader.glsl");
+
+    // Bind shader variables (uniforms) to indices
+    MVPLoc 	     	= glGetUniformLocation(shaderProgram, "MVP");
+    MVLoc        	= glGetUniformLocation(shaderProgram, "MV");
+    MLoc        	= glGetUniformLocation(shaderProgram, "M");
+    VLoc        	= glGetUniformLocation(shaderProgram, "V");
+    MVLightLoc   	= glGetUniformLocation(shaderProgram, "MVLight");
+    NMLoc	     	= glGetUniformLocation(shaderProgram, "NM");
+    lightPosLoc  	= glGetUniformLocation(shaderProgram, "lightPosition");
+    cameraPosLoc  	= glGetUniformLocation(shaderProgram, "cameraPosition");
+    colorLoc 	 	= glGetUniformLocation(shaderProgram, "color");
+    ambientLoc   	= glGetUniformLocation(shaderProgram, "ambientColor");
+    diffuseLoc   	= glGetUniformLocation(shaderProgram, "diffuseColor");
+    specularLoc     = glGetUniformLocation(shaderProgram, "specularColor");
+    transparencyLoc = glGetUniformLocation(shaderProgram, "transparency");
+    specularityLoc  = glGetUniformLocation(shaderProgram, "specularity");
+    shinynessLoc	= glGetUniformLocation(shaderProgram, "shinyness");
+
+    glUniform3f(lightPosLoc, lightPosition[0], lightPosition[1], lightPosition[2]);
+    glUniform3f(cameraPosLoc, cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+
+
+    glGenBuffers(1, &vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, mRenderVerts.size() * sizeof(glm::vec3), &mRenderVerts[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+    	0,								// shader layout, in this case 0
+    	3,								// size, 3 for vec3
+    	GL_FLOAT,						// type, float in vec3
+    	GL_FALSE,						// normalized, nope
+    	0,								// stride, 0
+    	reinterpret_cast<void*>(0)		// array buffer offset, none
+    );
+
+
+    glGenBuffers(1, &uvBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+    glBufferData(GL_ARRAY_BUFFER, mRenderUvs.size() * sizeof(glm::vec2), &mRenderUvs[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+    	1,								// shader layout, in this case 1
+    	2,								// size, 2 for vec2
+    	GL_FLOAT,						// type, float in vec2
+    	GL_FALSE,						// normalized, no
+    	0,								// stride, 0
+    	reinterpret_cast<void*>(0)		// array buffer offset, no
+    );
+
+    
+    glGenBuffers(1, &normalBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+    glBufferData(GL_ARRAY_BUFFER, mRenderNormals.size() * sizeof(glm::vec3), &mRenderNormals[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(
+    	2,								// shader layout, in this case 2
+    	3,								// size, 3 for a vec3
+    	GL_FLOAT,						// type, float for vec3's
+    	GL_FALSE,						// normalized, no
+    	0,								// stride, 0
+    	reinterpret_cast<void*>(0)		// array buffer offset, 0
+    );
+
+    std::cout << "\nGeometry initialized!\n";
 }
 
 
 void Geometry::render(std::vector<glm::mat4> matrices) {
 
+	/*glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+
+	matrices[I_MVP] = matrices[I_MVP] * translationMatrix;
+	matrices[I_MV] = matrices[I_MV] * translationMatrix;
+	matrices[I_M] = matrices[I_M] * translationMatrix;
+	matrices[I_V] = matrices[I_V] * translationMatrix;
+	//matrices[I_MV_LIGHT] = matrices[I_MV_LIGHT] * translationMatrix;
+	matrices[I_NM] = matrices[I_NM] * translationMatrix;
+*/
+	glUseProgram(shaderProgram);
+
+	// Pass data to shaders as uniforms
+	glUniformMatrix4fv(MVPLoc, 	   1, GL_FALSE, &matrices[I_MVP][0][0]);
+	glUniformMatrix4fv(MVLoc, 	   1, GL_FALSE, &matrices[I_MV][0][0]);
+	glUniformMatrix4fv(MLoc, 	   1, GL_FALSE, &matrices[I_M][0][0]);
+	glUniformMatrix4fv(VLoc, 	   1, GL_FALSE, &matrices[I_V][0][0]);
+	glUniformMatrix4fv(MVLightLoc, 1, GL_FALSE, &matrices[I_MV_LIGHT][0][0]);
+	glUniformMatrix4fv(NMLoc, 	   1, GL_FALSE, &matrices[I_NM][0][0]);
+	glUniform3f(colorLoc, 	 mMaterial.color[0],	mMaterial.color[1],    mMaterial.color[2]);
+	glUniform3f(ambientLoc,  mMaterial.ambient[0],  mMaterial.ambient[1],  mMaterial.ambient[2]);
+	glUniform3f(diffuseLoc,  mMaterial.diffuse[0],  mMaterial.diffuse[1],  mMaterial.diffuse[2]);
+	glUniform3f(specularLoc, mMaterial.specular[0], mMaterial.specular[1], mMaterial.specular[2]);
+	glUniform1f(transparencyLoc, mMaterial.transparency);
+	glUniform1f(specularityLoc,  mMaterial.specularity);
+	glUniform1f(shinynessLoc, 	 mMaterial.shinyness);
+
+	
+	// Rebind vertex, uv, and normal data, since everything is updated every frame
+	glBindVertexArray(vertexArrayID);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, mRenderVerts.size() 	* sizeof(glm::vec3), &mRenderVerts[0],   GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, mRenderUvs.size() 	* sizeof(glm::vec2), &mRenderUvs[0], 	 GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+	glBufferData(GL_ARRAY_BUFFER, mRenderNormals.size() * sizeof(glm::vec3), &mRenderNormals[0], GL_STATIC_DRAW);
+
+	// Draw the polygons
+	glDrawArrays(GL_TRIANGLES, 0, mRenderVerts.size());
+
+	// Unbind
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
 }
 
 
@@ -62,13 +186,13 @@ bool Geometry::loadMesh(const char * objName) {
 		addFace(v, u, n);
 	}
 
-	/*for(unsigned int i = 0; i < mVerts.size(); i++)
-		std::cout << "\nvert index " << i << ": " << mVerts[i].pos.x << ", " << mVerts[i].pos.y << ", " << mVerts[i].pos.z << std::endl;
+/*	for(unsigned int i = 0; i < mVerts.size(); i++)
+		std::cout << "\nvert index " << i << ": " << mVerts[i].pos.x << ", " << mVerts[i].pos.y << ", " << mVerts[i].pos.z << std::endl;*/
 
-	for(unsigned int i = 0; i < mVerts.size(); i++)
-		std::cout << "\nnormal vert index " << i << ": " << mVerts[i].normal.x << ", " << mVerts[i].normal.y << ", " << mVerts[i].normal.z << std::endl;
+/*	for(unsigned int i = 0; i < mVerts.size(); i++)
+		std::cout << "\nnormal vert index " << i << ": " << mVerts[i].normal.x << ", " << mVerts[i].normal.y << ", " << mVerts[i].normal.z << std::endl;*/
 
-	for(unsigned int i = 0; i < mUvs.size(); i++)
+/*	for(unsigned int i = 0; i < mUvs.size(); i++)
 		std::cout << "\nuv index " << i << ": " << mUvs[i].x << ", " << mUvs[i].y << std::endl;*/
 }
 
@@ -168,12 +292,24 @@ void Geometry::buildRenderData() {
 		mRenderVerts.push_back(mVerts[mFaces[i].v2].pos);
 		mRenderVerts.push_back(mVerts[mFaces[i].v3].pos);
 
+		//std::cout << "vert1: " << mVerts[mFaces[i].v1].pos.x << ", " << mVerts[mFaces[i].v1].pos.y << ", " << mVerts[mFaces[i].v1].pos.z << std::endl;
+		//std::cout << "vert2: " << mVerts[mFaces[i].v2].pos.x << ", " << mVerts[mFaces[i].v2].pos.y << ", " << mVerts[mFaces[i].v2].pos.z << std::endl;
+		//std::cout << "vert3: " << mVerts[mFaces[i].v3].pos.x << ", " << mVerts[mFaces[i].v3].pos.y << ", " << mVerts[mFaces[i].v3].pos.z << std::endl;
+
 		mRenderUvs.push_back(mVerts[mFaces[i].v1].uv);
 		mRenderUvs.push_back(mVerts[mFaces[i].v2].uv);
 		mRenderUvs.push_back(mVerts[mFaces[i].v3].uv);
 
+		//std::cout << "uv1: " << mVerts[mFaces[i].v1].uv.x << ", " << mVerts[mFaces[i].v1].uv.y << std::endl;
+		//std::cout << "uv2: " << mVerts[mFaces[i].v2].uv.x << ", " << mVerts[mFaces[i].v2].uv.y << std::endl;
+		//std::cout << "uv3: " << mVerts[mFaces[i].v3].uv.x << ", " << mVerts[mFaces[i].v3].uv.y << std::endl;
+
 		mRenderNormals.push_back(mVerts[mFaces[i].v1].normal);
 		mRenderNormals.push_back(mVerts[mFaces[i].v2].normal);
 		mRenderNormals.push_back(mVerts[mFaces[i].v3].normal);
+
+		//std::cout << "normal1: " << mVerts[mFaces[i].v1].normal.x << ", " << mVerts[mFaces[i].v1].normal.y << ", " << mVerts[mFaces[i].v1].normal.z << std::endl;
+		//std::cout << "normal2: " << mVerts[mFaces[i].v2].normal.x << ", " << mVerts[mFaces[i].v2].normal.y << ", " << mVerts[mFaces[i].v2].normal.z << std::endl;
+		//std::cout << "normal3: " << mVerts[mFaces[i].v3].normal.x << ", " << mVerts[mFaces[i].v3].normal.y << ", " << mVerts[mFaces[i].v3].normal.z << std::endl;
 	}
 }

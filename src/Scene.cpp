@@ -21,29 +21,17 @@ void Scene::initialize() {
 	std::cout << "\nInitializing Scene...";
 
 	// Background color
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+	// Set up the camera
+	mCamera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+	mCamera->initialize();
 
 	// Light source position
-	mLightSource.pos = glm::vec3(0.0f, 4.0f, 0.0f);
-
-	// Set M, V and P matrices for the scene
-	mProjectionMatrix = glm::perspective(
-							45.0f,			// Field of view
-							4.0f / 3.0f,	// Aspect ratio
-							0.1f,			// Near clipping plane
-							100.0f			// Far clipping plane
-						);
-
-	mViewMatrix 	  = glm::lookAt(
-							glm::vec3(0.0f, 0.0f, 3.0f),	// Camera position in world coordinates
-							glm::vec3(0.0f, 0.0f, 0.0f),	// Look-at position
-							glm::vec3(0.0f, 1.0f, 0.0f)		// Up vector
-						);
-
-	mModelMatrix	  = glm::mat4(1.0f);
+	mLightSource.pos = glm::vec3(0.0f, 5.0f, 0.0f);
 
 	for(std::vector<Geometry *>::iterator it = mGeometries.begin(); it != mGeometries.end(); ++it)
-		(*it)->initialize(mLightSource.pos);
+		(*it)->initialize(mLightSource.pos, mCamera->getPosition());
 
 	std::cout << "Done!\n";
 }
@@ -51,15 +39,19 @@ void Scene::initialize() {
 
 void Scene::render() {
 
-	mMatrices.resize(4);
+	mMatrices.resize(6);
 
-	mMatrices[I_MVP] 	  = mProjectionMatrix * mViewMatrix * mModelMatrix;
+	mMatrices[I_MVP] 	  = mCamera->getProjectionMatrix() * mCamera->getViewMatrix() * mCamera->getModelMatrix();
 
-	mMatrices[I_MV] 	  = mViewMatrix * mModelMatrix;
+	mMatrices[I_MV] 	  = mCamera->getViewMatrix() * mCamera->getModelMatrix();
 
-	mMatrices[I_MV_LIGHT] = mViewMatrix * mModelMatrix;
+	mMatrices[I_M] 	  	  = mCamera->getModelMatrix();
 
-	mMatrices[I_NM]		  = glm::inverseTranspose(glm::mat4(mViewMatrix * mModelMatrix));
+	mMatrices[I_V] 	  	  = mCamera->getViewMatrix();
+
+	mMatrices[I_MV_LIGHT] = mCamera->getViewMatrix() * mCamera->getModelMatrix();
+
+	mMatrices[I_NM]		  = glm::inverseTranspose(glm::mat4(mCamera->getViewMatrix() * mCamera->getModelMatrix()));
 
 
 	for(std::vector<Geometry *>::iterator it = mGeometries.begin(); it != mGeometries.end(); ++it)

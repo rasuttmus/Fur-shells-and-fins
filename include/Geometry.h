@@ -8,20 +8,22 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "utils/Util.h"
 #include "utils/ObjectLoader.h"
+#include "utils/Shader.h"
 
 
 class Geometry {
 
 public:
 
-    Geometry(std::string);
+    Geometry(std::string, glm::vec3 c = glm::vec3(1.0f, 1.0f, 1.0f));
 
     ~Geometry();
 
-    void initialize(glm::vec3);
+    void initialize(glm::vec3, glm::vec3);
 
     void render(std::vector<glm::mat4>);
 
@@ -111,6 +113,8 @@ private:
 
     GLuint vertexBuffer;
 
+    GLuint uvBuffer;
+
     GLuint normalBuffer;
 
     GLuint shaderProgram;
@@ -121,20 +125,26 @@ private:
     GLint MVPLoc;
     
     GLint MVLoc;
+
+    GLint MLoc;
+
+    GLint VLoc;
     
     GLint MVLightLoc;
     
     GLint NMLoc;
     
     GLint lightPosLoc;
+
+    GLint cameraPosLoc;
     
     GLint colorLoc;
     
-    GLint lightAmbLoc;
+    GLint ambientLoc;
     
-    GLint lightDifLoc;
+    GLint diffuseLoc;
     
-    GLint lightSpeLoc;
+    GLint specularLoc;
 
     GLint transparencyLoc;
     

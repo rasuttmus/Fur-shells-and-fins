@@ -41,7 +41,7 @@ int main() {
     // Create scene here.
     scene = new Scene();
 
-    mesh = new Geometry("plane");
+    mesh = new Geometry("blender_monkey", glm::vec3(0.8f, 0.5f, 0.5f));
 
     scene->addGeometry(mesh);
 
@@ -56,6 +56,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Render scene
+        scene->render();
 
         // Swap buffers
         glfwSwapBuffers(window);
