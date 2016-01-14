@@ -10,6 +10,10 @@
 
 // functions
 int initializeOpenGL();
+void mouseButton(GLFWwindow *, int, int, int);
+void mouseMotion(GLFWwindow *, double, double);
+void mouseScroll(GLFWwindow *, double, double);
+void keyboardInput(GLFWwindow *, int, int, int, int);
 double calculateFPS(double, std::string);
 
 
@@ -22,10 +26,6 @@ Geometry * mesh;
 
 // global variables
 std::string windowTitle = "Fur";
-
-// constants
-const int WIDTH = 1024;
-const int HEIGHT = 768;
 
 
 int main() {
@@ -48,6 +48,11 @@ int main() {
     // Initialize scene
     scene->initialize();
 
+    // Bind mouse and keyboard callback functions
+    glfwSetMouseButtonCallback(window, mouseButton);
+    glfwSetCursorPosCallback(window, mouseMotion);
+    glfwSetScrollCallback(window, mouseScroll);
+    glfwSetKeyCallback(window, keyboardInput);
 
     // Render-loop
     do {
@@ -80,9 +85,8 @@ int main() {
 int initializeOpenGL() {
     
     // Initialise GLFW
-    if( !glfwInit() )
-    {
-        fprintf( stderr, "Failed to initialize GLFW\n" );
+    if(!glfwInit()) {
+        fprintf(stderr, "Failed to initialize GLFW\n");
         return -1;
     }
 
@@ -92,8 +96,10 @@ int initializeOpenGL() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     window = glfwCreateWindow( WIDTH, HEIGHT, windowTitle.c_str(), NULL, NULL);
+
     if( window == NULL ){
-        fprintf( stderr, "Failed to open GLFW window. You might be having an old GPU\n" );
+
+        fprintf(stderr, "Failed to open GLFW window. You might be having an old GPU\n");
         glfwTerminate();
         return -1;
     }
@@ -101,6 +107,7 @@ int initializeOpenGL() {
 
     // Initialize GLEW
     if (glewInit() != GLEW_OK) {
+
         fprintf(stderr, "Failed to initialize GLEW\n");
         return -1;
     }
@@ -111,6 +118,68 @@ int initializeOpenGL() {
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
     return 0;
+}
+
+
+void mouseButton(GLFWwindow * window, int button, int action, int mods) {
+    
+    if(button != GLFW_MOUSE_BUTTON_LEFT)
+        return;
+
+    switch(action) {
+
+        case GLFW_PRESS:
+
+            double x, y;
+
+            glfwGetCursorPos(window, &x, &y);
+
+            scene->mousePress(x, y);
+            
+            break;
+
+        case GLFW_RELEASE:
+
+            scene->mouseRelease();
+            
+            break;
+
+        default:
+            
+            break;
+    }
+}
+
+
+void mouseMotion(GLFWwindow * window, double x, double y) {
+    
+    scene->updateCameraPosition(x, y);
+}
+
+
+void mouseScroll(GLFWwindow * window, double x, double y) {
+    
+    scene->updateCameraZoom(x, y);
+}
+
+
+void keyboardInput(GLFWwindow* window, int key, int scancode, int action, int mods) {
+
+    if(action == GLFW_PRESS) {
+        
+        switch(key) {
+            
+            case GLFW_KEY_SPACE:
+                
+                scene->resetCamera();
+                
+                break;
+
+            default:
+                
+                break;
+        }
+    }
 }
 
 

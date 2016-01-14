@@ -41,8 +41,8 @@ void main() {
 	float cosAlpha = clamp(dot(E, R), 0, 1);
 
 	fragmentColor.rgb = ambientColor  * color
-		  			  + diffuseColor  * color * lightPower * cosTheta / (distance * distance)
-		  			  + specularColor * color * lightPower * pow(cosAlpha, specularity) / (distance * distance);
+		  			  + diffuseColor  * color * lightPower * cosTheta / (distance)
+		  			  + specularColor * color * lightPower * pow(cosAlpha, specularity) / (distance);
 
 	fragmentColor.a = transparency;
 }

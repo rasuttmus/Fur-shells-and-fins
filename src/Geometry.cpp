@@ -102,15 +102,9 @@ void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
 
 void Geometry::render(std::vector<glm::mat4> matrices) {
 
-	/*glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	glEnable( GL_CULL_FACE );
+    glEnable(GL_DEPTH_TEST);
 
-	matrices[I_MVP] = matrices[I_MVP] * translationMatrix;
-	matrices[I_MV] = matrices[I_MV] * translationMatrix;
-	matrices[I_M] = matrices[I_M] * translationMatrix;
-	matrices[I_V] = matrices[I_V] * translationMatrix;
-	//matrices[I_MV_LIGHT] = matrices[I_MV_LIGHT] * translationMatrix;
-	matrices[I_NM] = matrices[I_NM] * translationMatrix;
-*/
 	glUseProgram(shaderProgram);
 
 	// Pass data to shaders as uniforms
@@ -149,6 +143,9 @@ void Geometry::render(std::vector<glm::mat4> matrices) {
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+
+	glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
 }
 
 

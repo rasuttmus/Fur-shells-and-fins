@@ -9,6 +9,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
+#include "../include/utils/Util.h"
+
 
 class Camera {
 
@@ -18,17 +20,54 @@ public:
 
 	~Camera();
 
-	void initialize();
+	void update();
 
-	glm::mat4 getModelMatrix() { return mModelMatrix; };
+	glm::quat& rotate(glm::quat &, double, double);
 
-	glm::mat4 getViewMatrix() { return mViewMatrix; };
+    glm::vec2 direction(double x, double y);
 
-	glm::mat4 getProjectionMatrix() { return mProjectionMatrix; };
+    void dragStart(double, double);
+    
+    void dragUpdate(double, double);
+    
+    void dragEnd();
+    
+    bool dragged() const { return mDragged; }
 
-	glm::vec3 getPosition() { return mPosition; };
+    void center(float x, float y) { mCenterPosition.x = x; mCenterPosition.y = y; }
+
+    void reset();
+
+	glm::mat4 getModelMatrix() { return mModelMatrix; }
+
+	glm::mat4 getViewMatrix() { return mViewMatrix; }
+
+	glm::mat4 getProjectionMatrix() { return mProjectionMatrix; }
+
+	glm::vec3 getPosition() { return mPosition; }
+
+	glm::quat& getOrientation() { return mOrientation; }
+
+	float getZoom() { return mZoom; }
+
+	void setModelMatrix(glm::mat4 M) { mModelMatrix = M; }
+
+	void setViewMatrix(glm::mat4 V) { mViewMatrix = V; }
+
+	void setProjectionMatrix(glm::mat4 P) { mProjectionMatrix = P; }
+
+	void setOrientation(glm::quat O) { mOrientation = O; }
+
+	void setZoom(float z) { mZoom = z; }
 
 private:
+
+	// Functions
+
+	glm::vec3 map_to_sphere(const glm::vec2 &point);
+
+
+	// Instance variables
 
 	glm::mat4 mModelMatrix;
 
@@ -36,8 +75,19 @@ private:
 
 	glm::mat4 mProjectionMatrix;
 
+	glm::quat mOrientation;
+
 	glm::vec3 mPosition;
 
+	glm::vec2 mCenterPosition;
+    
+    glm::vec2 mDragStartPosition;
+    
+    float mRadius;
+
+    float mZoom;
+    
+    bool mDragged;
 };
 
 #endif // CAMERA_H

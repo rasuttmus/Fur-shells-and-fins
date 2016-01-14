@@ -35,9 +35,13 @@ namespace glm {
   	}
 }
 
+// Constants
 const std::string PATH_OBJ = "assets/";
 const std::string FILE_NAME_OBJ = ".obj";
 
 const static unsigned int UNINITIALIZED = (std::numeric_limits<unsigned int>::max)();
+
+const int WIDTH = 1024;
+const int HEIGHT = 768;
 
 #endif // UTIL_H

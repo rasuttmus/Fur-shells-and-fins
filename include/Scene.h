@@ -20,6 +20,16 @@ public:
 
 	void addGeometry(Geometry * G) { mGeometries.push_back(G); }
 
+	void updateCameraPosition(double, double);
+
+    void updateCameraZoom(double, double);
+    
+    void mousePress(double x, double y) { mCamera->dragStart(x, y); }
+    
+    void mouseRelease() { mCamera->dragEnd(); }
+
+    void resetCamera();
+
 private:
 
 	// Instance varialbes
@@ -44,7 +54,8 @@ private:
 
 		glm::vec3 pos;
 		glm::vec4 color;
-	}mLightSource;
+
+	} mLightSource;
 
 };
 
