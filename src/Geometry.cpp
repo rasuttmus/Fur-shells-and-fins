@@ -47,8 +47,9 @@ void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
     transparencyLoc = glGetUniformLocation(shaderProgram, "transparency");
     specularityLoc  = glGetUniformLocation(shaderProgram, "specularity");
     shinynessLoc	= glGetUniformLocation(shaderProgram, "shinyness");
+    lightPowerLoc   = glGetUniformLocation(shaderProgram, "lightPower");
 
-    glUniform3f(lightPosLoc, lightPosition[0], lightPosition[1], lightPosition[2]);
+    glUniform3f(lightPosLoc,  lightPosition[0],  lightPosition[1],  lightPosition[2]);
     glUniform3f(cameraPosLoc, cameraPosition[0], cameraPosition[1], cameraPosition[2]);
 
 
@@ -100,7 +101,7 @@ void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
 }
 
 
-void Geometry::render(std::vector<glm::mat4> matrices) {
+void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower) {
 
 	glEnable( GL_CULL_FACE );
     glEnable(GL_DEPTH_TEST);
@@ -108,19 +109,20 @@ void Geometry::render(std::vector<glm::mat4> matrices) {
 	glUseProgram(shaderProgram);
 
 	// Pass data to shaders as uniforms
-	glUniformMatrix4fv(MVPLoc, 	   1, GL_FALSE, &matrices[I_MVP][0][0]);
-	glUniformMatrix4fv(MVLoc, 	   1, GL_FALSE, &matrices[I_MV][0][0]);
-	glUniformMatrix4fv(MLoc, 	   1, GL_FALSE, &matrices[I_M][0][0]);
-	glUniformMatrix4fv(VLoc, 	   1, GL_FALSE, &matrices[I_V][0][0]);
-	glUniformMatrix4fv(MVLightLoc, 1, GL_FALSE, &matrices[I_MV_LIGHT][0][0]);
-	glUniformMatrix4fv(NMLoc, 	   1, GL_FALSE, &matrices[I_NM][0][0]);
-	glUniform3f(colorLoc, 	 mMaterial.color[0],	mMaterial.color[1],    mMaterial.color[2]);
-	glUniform3f(ambientLoc,  mMaterial.ambient[0],  mMaterial.ambient[1],  mMaterial.ambient[2]);
-	glUniform3f(diffuseLoc,  mMaterial.diffuse[0],  mMaterial.diffuse[1],  mMaterial.diffuse[2]);
-	glUniform3f(specularLoc, mMaterial.specular[0], mMaterial.specular[1], mMaterial.specular[2]);
-	glUniform1f(transparencyLoc, mMaterial.transparency);
-	glUniform1f(specularityLoc,  mMaterial.specularity);
-	glUniform1f(shinynessLoc, 	 mMaterial.shinyness);
+	glUniformMatrix4fv(MVPLoc, 	   		1, 						 GL_FALSE, 				&matrices[I_MVP][0][0]);
+	glUniformMatrix4fv(MVLoc, 	   		1, 						 GL_FALSE, 				&matrices[I_MV][0][0]);
+	glUniformMatrix4fv(MLoc, 	   		1, 						 GL_FALSE, 				&matrices[I_M][0][0]);
+	glUniformMatrix4fv(VLoc, 	   		1, 						 GL_FALSE, 				&matrices[I_V][0][0]);
+	glUniformMatrix4fv(MVLightLoc, 		1, 						 GL_FALSE, 				&matrices[I_MV_LIGHT][0][0]);
+	glUniformMatrix4fv(NMLoc, 	   		1, 						 GL_FALSE, 				&matrices[I_NM][0][0]);
+	glUniform3f(	   colorLoc, 	    mMaterial.color[0],	     mMaterial.color[1],    mMaterial.color[2]);
+	glUniform3f( 	   ambientLoc,      mMaterial.ambient[0],    mMaterial.ambient[1],  mMaterial.ambient[2]);
+	glUniform3f( 	   diffuseLoc,      mMaterial.diffuse[0],    mMaterial.diffuse[1],  mMaterial.diffuse[2]);
+	glUniform3f( 	   specularLoc,     mMaterial.specular[0],   mMaterial.specular[1], mMaterial.specular[2]);
+	glUniform1f( 	   transparencyLoc, mMaterial.transparency);
+	glUniform1f( 	   specularityLoc,  mMaterial.specularity);
+	glUniform1f( 	   shinynessLoc, 	mMaterial.shinyness);
+	glUniform1f(	   lightPowerLoc,   lightSourcePower);
 
 	
 	// Rebind vertex, uv, and normal data, since everything is updated every frame
@@ -182,15 +184,6 @@ bool Geometry::loadMesh(const char * objName) {
 
 		addFace(v, u, n);
 	}
-
-/*	for(unsigned int i = 0; i < mVerts.size(); i++)
-		std::cout << "\nvert index " << i << ": " << mVerts[i].pos.x << ", " << mVerts[i].pos.y << ", " << mVerts[i].pos.z << std::endl;*/
-
-/*	for(unsigned int i = 0; i < mVerts.size(); i++)
-		std::cout << "\nnormal vert index " << i << ": " << mVerts[i].normal.x << ", " << mVerts[i].normal.y << ", " << mVerts[i].normal.z << std::endl;*/
-
-/*	for(unsigned int i = 0; i < mUvs.size(); i++)
-		std::cout << "\nuv index " << i << ": " << mUvs[i].x << ", " << mUvs[i].y << std::endl;*/
 }
 
 
@@ -289,24 +282,12 @@ void Geometry::buildRenderData() {
 		mRenderVerts.push_back(mVerts[mFaces[i].v2].pos);
 		mRenderVerts.push_back(mVerts[mFaces[i].v3].pos);
 
-		//std::cout << "vert1: " << mVerts[mFaces[i].v1].pos.x << ", " << mVerts[mFaces[i].v1].pos.y << ", " << mVerts[mFaces[i].v1].pos.z << std::endl;
-		//std::cout << "vert2: " << mVerts[mFaces[i].v2].pos.x << ", " << mVerts[mFaces[i].v2].pos.y << ", " << mVerts[mFaces[i].v2].pos.z << std::endl;
-		//std::cout << "vert3: " << mVerts[mFaces[i].v3].pos.x << ", " << mVerts[mFaces[i].v3].pos.y << ", " << mVerts[mFaces[i].v3].pos.z << std::endl;
-
 		mRenderUvs.push_back(mVerts[mFaces[i].v1].uv);
 		mRenderUvs.push_back(mVerts[mFaces[i].v2].uv);
 		mRenderUvs.push_back(mVerts[mFaces[i].v3].uv);
 
-		//std::cout << "uv1: " << mVerts[mFaces[i].v1].uv.x << ", " << mVerts[mFaces[i].v1].uv.y << std::endl;
-		//std::cout << "uv2: " << mVerts[mFaces[i].v2].uv.x << ", " << mVerts[mFaces[i].v2].uv.y << std::endl;
-		//std::cout << "uv3: " << mVerts[mFaces[i].v3].uv.x << ", " << mVerts[mFaces[i].v3].uv.y << std::endl;
-
 		mRenderNormals.push_back(mVerts[mFaces[i].v1].normal);
 		mRenderNormals.push_back(mVerts[mFaces[i].v2].normal);
 		mRenderNormals.push_back(mVerts[mFaces[i].v3].normal);
-
-		//std::cout << "normal1: " << mVerts[mFaces[i].v1].normal.x << ", " << mVerts[mFaces[i].v1].normal.y << ", " << mVerts[mFaces[i].v1].normal.z << std::endl;
-		//std::cout << "normal2: " << mVerts[mFaces[i].v2].normal.x << ", " << mVerts[mFaces[i].v2].normal.y << ", " << mVerts[mFaces[i].v2].normal.z << std::endl;
-		//std::cout << "normal3: " << mVerts[mFaces[i].v3].normal.x << ", " << mVerts[mFaces[i].v3].normal.y << ", " << mVerts[mFaces[i].v3].normal.z << std::endl;
 	}
 }

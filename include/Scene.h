@@ -30,6 +30,8 @@ public:
 
     void resetCamera();
 
+    float &getLightSourcePower() { return mLightSource.power; }
+
 private:
 
 	// Instance varialbes
@@ -48,12 +50,15 @@ private:
 
 	struct LightSource {
 		LightSource(const glm::vec3 & p = glm::vec3(0.0f, 0.0f, 0.0f),
-					const glm::vec4 & c = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))
+					const glm::vec4 & c = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
+					const float pow 	= 6.0f)
 			: pos(p),
-			  color(c) {}
+			  color(c),
+			  power(pow) {}
 
 		glm::vec3 pos;
 		glm::vec4 color;
+		float power;
 
 	} mLightSource;
 

@@ -10,6 +10,7 @@ uniform vec3 lightPosition;
 uniform float transparency;
 uniform float specularity;
 uniform float shinyness;
+uniform float lightPower;
 
 in vec3 normal;
 in vec3 vertexPositionWorldSpace;
@@ -23,17 +24,13 @@ out vec4 fragmentColor;
 void main() {
 
 	UV;
-	float lightPower = 5.0f;
-
 
 	float distance = length(lightPosition - vertexPositionWorldSpace);
-
 
 	vec3 n = normalize(normal);
 	vec3 l = normalize(lightDirectionCameraSpace);
 
 	float cosTheta = clamp(dot(n, l), 0, 1);
-
 
 	vec3 E = normalize(viewDirectionCameraSpace);
 	vec3 R = reflect(-l, n);
@@ -42,7 +39,7 @@ void main() {
 
 	fragmentColor.rgb = ambientColor  * color
 		  			  + diffuseColor  * color * lightPower * cosTheta / (distance)
-		  			  + specularColor * color * lightPower * pow(cosAlpha, specularity) / (distance);
+		  			  + shinyness * specularColor * color * lightPower * pow(cosAlpha, specularity) / (distance);
 
 	fragmentColor.a = transparency;
 }

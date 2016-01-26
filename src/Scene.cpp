@@ -55,7 +55,7 @@ void Scene::render() {
 	mMatrices[I_NM]		  = glm::inverseTranspose(glm::mat4(mCamera->getViewMatrix() * mCamera->getModelMatrix()));
 
 	for(std::vector<Geometry *>::iterator it = mGeometries.begin(); it != mGeometries.end(); ++it)
-		(*it)->render(mMatrices);
+		(*it)->render(mMatrices, mLightSource.power);
 }
 
 

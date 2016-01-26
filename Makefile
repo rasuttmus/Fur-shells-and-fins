@@ -5,7 +5,7 @@ CC = g++-4.9
 CFLAGS = -O3
 
 # Libs and Frameworks:
-FRAMEWORKS = -lglew -lglfw3 -framework Opengl -framework Cocoa -framework IOKit -framework CoreVideo -std=c++11
+FRAMEWORKS = -lglew -lglfw3 -lAntTweakBar -framework Opengl -framework Cocoa -framework IOKit -framework CoreVideo -std=c++11
 
 # Location for libs:
 LIBFOLD = -L"/usr/local/lib"
@@ -14,7 +14,6 @@ INCFOLD = -I"/usr/local/include"
 
 # Files:
 FILES = $(wildcard src/*.cpp) $(wildcard shaders/*.cpp) $(wildcard src/utils/*.cpp)
-#$(wildcard src/tools/*.cpp) $(wildcard src/utils/*.cpp)
 
 # Binary folder:
 BINFOLD = bin/

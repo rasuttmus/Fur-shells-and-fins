@@ -4,12 +4,15 @@
 #include <math.h>
 #include <vector>
 
+#include <AntTweakBar.h>
+
 #include "../include/Scene.h"
 #include "../include/Geometry.h"
 
 
 // functions
 int initializeOpenGL();
+void initializeAntTweakBar();
 void mouseButton(GLFWwindow *, int, int, int);
 void mouseMotion(GLFWwindow *, double, double);
 void mouseScroll(GLFWwindow *, double, double);
@@ -20,13 +23,16 @@ double calculateFPS(double, std::string);
 // pointer objects
 GLFWwindow * window = nullptr;
 
+TwBar * tweakbar = nullptr;
+
 Scene * scene = nullptr;
 
 Geometry * mesh;
 
 // global variables
-std::string windowTitle = "Fur";
+std::string windowTitle = "Fur - Shells and Fins";
 
+float color[] = {0.0f, 0.0f, 0.0f};
 
 int main() {
 
@@ -41,12 +47,15 @@ int main() {
     // Create scene here.
     scene = new Scene();
 
-    mesh = new Geometry("blender_monkey", glm::vec3(0.8f, 0.5f, 0.5f));
+    mesh = new Geometry("bunny", glm::vec3(0.8f, 0.5f, 0.5f));
 
     scene->addGeometry(mesh);
 
     // Initialize scene
     scene->initialize();
+
+    // Initialze AntTweakBar
+    initializeAntTweakBar();
 
     // Bind mouse and keyboard callback functions
     glfwSetMouseButtonCallback(window, mouseButton);
@@ -60,8 +69,13 @@ int main() {
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        //mesh->setSpecularity(specularity);
+
         // Render scene
         scene->render();
+
+        // Render AntTweakBar
+        TwDraw();
 
         // Swap buffers
         glfwSwapBuffers(window);
@@ -74,6 +88,9 @@ int main() {
 
     // Clean-up
     delete scene;
+
+    // Uninitialize AntTweakBar
+    TwTerminate();
 
     // Close OpenGL window and terminate GLFW
     glfwTerminate();
@@ -114,46 +131,122 @@ int initializeOpenGL() {
 
     std::cout << "Running OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 
-    // Ensure we can capture the escape key being pressed below
+    // Ensure we can capture keyboard input
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
     return 0;
 }
 
 
+void initializeAntTweakBar() {
+
+    // Scale the font, since AntTweakBar doesn't like retina displays
+    TwDefine(" GLOBAL fontscaling=2 ");
+
+    TwInit(TW_OPENGL_CORE, NULL);
+
+    TwWindowSize(WIDTH * 1.96, HEIGHT * 1.96);
+
+    // Create tweakbar and set its size
+    tweakbar = TwNewBar("Properties");
+    TwDefine("Properties size='400 600' ");
+
+    // Main color of material
+    TwAddVarRW(tweakbar, 
+            "Color", 
+            TW_TYPE_COLOR3F, 
+            &mesh->getColor(), 
+            " group='Material' label='Color' "
+        );
+
+    // Ambient component
+    TwAddVarRW(tweakbar, 
+            "Ambient", 
+            TW_TYPE_COLOR3F, 
+            &mesh->getAmbient(), 
+            " group='Material' label='Ambient' "
+        );
+
+    // Diffuse component
+    TwAddVarRW(tweakbar, 
+            "Diffuse", 
+            TW_TYPE_COLOR3F, 
+            &mesh->getDiffuse(), 
+            " group='Material' label='Diffuse' "
+        );
+
+    // Specular component
+    TwAddVarRW(tweakbar, 
+            "Specular", 
+            TW_TYPE_COLOR3F, 
+            &mesh->getSpecular(), 
+            " group='Material' label='Specular' "
+        );
+
+    // Specularity of material
+    TwAddVarRW(
+            tweakbar, 
+            "Specularity", 
+            TW_TYPE_FLOAT, 
+            &mesh->getSpecularity(),
+            " group='Material' label='Specularity' min=1 max=50 step=1 help='Specularity of material' "
+        );
+
+    // Shinyness of material
+    TwAddVarRW(
+            tweakbar, 
+            "Shinyness", 
+            TW_TYPE_FLOAT, 
+            &mesh->getShinyness(),
+            " group='Material' label='Shinyness' min=0 max=1 step=0.01 help='Shinyness of material' "
+        );
+
+    // Light source power
+    TwAddVarRW(
+            tweakbar, 
+            "Power", 
+            TW_TYPE_FLOAT, 
+            &scene->getLightSourcePower(),
+            " group='Light Source' label='Power' min=0 max=25 step=1 help='Light Source Power' "
+        );
+}
+
+
 void mouseButton(GLFWwindow * window, int button, int action, int mods) {
     
-    if(button != GLFW_MOUSE_BUTTON_LEFT)
-        return;
+    if(!TwEventMouseButtonGLFW(button, action)) {
 
-    switch(action) {
+        if(button != GLFW_MOUSE_BUTTON_LEFT)
+            return;
 
-        case GLFW_PRESS:
+        switch(action) {
 
-            double x, y;
+            case GLFW_PRESS:
 
-            glfwGetCursorPos(window, &x, &y);
+                double x, y;
+                glfwGetCursorPos(window, &x, &y);
+                scene->mousePress(x, y);
+                break;
 
-            scene->mousePress(x, y);
-            
-            break;
+            case GLFW_RELEASE:
 
-        case GLFW_RELEASE:
+                scene->mouseRelease();
+                
+                break;
 
-            scene->mouseRelease();
-            
-            break;
-
-        default:
-            
-            break;
+            default:
+                
+                break;
+        }
     }
 }
 
 
 void mouseMotion(GLFWwindow * window, double x, double y) {
     
-    scene->updateCameraPosition(x, y);
+    if(!TwEventMousePosGLFW(x * 2, y * 2)) {
+        scene->updateCameraPosition(x, y);
+    }
 }
 
 
@@ -198,27 +291,24 @@ double calculateFPS(double timeInterval = 1.0, std::string windowTitle = "NONE")
  
     // Ensure the time interval between FPS checks is sane (low cap = 0.0 i.e. every frame, high cap = 10.0s)
     if (timeInterval < 0.0)
-    {
         timeInterval = 0.0;
-    }
+
     else if (timeInterval > 10.0)
-    {
         timeInterval = 10.0;
-    }
  
     // Get the duration in seconds since the last FPS reporting interval elapsed
     // as the current time minus the interval start time
     double duration = glfwGetTime() - startTime;
  
     // If the time interval has elapsed...
-    if (duration > timeInterval)
-    {
+    if (duration > timeInterval) {
+
         // Calculate the FPS as the number of frames divided by the duration in seconds
         fps = round(frameCount / duration);
  
         // If the user specified a window title to append the FPS value to...
-        if (windowTitle != "NONE")
-        {
+        if (windowTitle != "NONE") {
+
             // Convert the fps value into a string using an output stringstream
             std::ostringstream stream;
             stream << fps;
@@ -231,8 +321,9 @@ double calculateFPS(double timeInterval = 1.0, std::string windowTitle = "NONE")
             const char* pszConstString = windowTitle.c_str();
             glfwSetWindowTitle(window, pszConstString);
         }
-        else // If the user didn't specify a window to append the FPS to then output the FPS to the console
-        {
+        // If the user didn't specify a window to append the FPS to then output the FPS to the console
+        else {
+            
             std::cout << "FPS: " << fps << std::endl;
         }
  

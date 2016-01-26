@@ -25,7 +25,19 @@ public:
 
     void initialize(glm::vec3, glm::vec3);
 
-    void render(std::vector<glm::mat4>);
+    void render(std::vector<glm::mat4>, float);
+
+    glm::vec3 &getColor()       { return mMaterial.color; }
+
+    glm::vec3 &getAmbient()     { return mMaterial.ambient; }
+
+    glm::vec3 &getDiffuse()     { return mMaterial.diffuse; }
+
+    glm::vec3 &getSpecular()    { return mMaterial.specular; }
+
+    float     &getSpecularity() { return mMaterial.specularity; }
+
+    float     &getShinyness()   { return mMaterial.shinyness; }
 
 private:
 
@@ -82,7 +94,7 @@ private:
                  const glm::vec3 & d = glm::vec3(0.8f, 0.8f, 0.8f),
                  const glm::vec3 & s = glm::vec3(1.0f, 1.0f, 1.0f),
                  float t             = 1.0f,
-                 float sp            = 50.0f,
+                 float sp            = 25.0f,
                  float sh            = 0.7f)
             : color(c),
               ambient(a),
@@ -151,6 +163,8 @@ private:
     GLint specularityLoc;
     
     GLint shinynessLoc;
+
+    GLint lightPowerLoc;
 
 
     // Containers
