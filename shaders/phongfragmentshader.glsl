@@ -1,12 +1,12 @@
 #version 330 core
 
-uniform mat4 NM;
-uniform vec3 cameraPosition;
-uniform vec3 color;
-uniform vec3 ambientColor;
-uniform vec3 diffuseColor;
-uniform vec3 specularColor;
-uniform vec3 lightPosition;
+uniform mat4  NM;
+uniform vec3  cameraPosition;
+uniform vec3  color;
+uniform vec3  ambientColor;
+uniform vec3  diffuseColor;
+uniform vec3  specularColor;
+uniform vec3  lightPosition;
 uniform float transparency;
 uniform float specularity;
 uniform float shinyness;
@@ -19,7 +19,6 @@ in vec3 viewDirectionCameraSpace;
 in vec2 UV;
 
 out vec4 fragmentColor;
-
 
 void main() {
 
@@ -38,8 +37,8 @@ void main() {
 	float cosAlpha = clamp(dot(E, R), 0, 1);
 
 	fragmentColor.rgb = ambientColor  * color
-		  			  + diffuseColor  * color * lightPower * cosTheta / (distance)
-		  			  + shinyness * specularColor * color * lightPower * pow(cosAlpha, specularity) / (distance);
+		  			  + diffuseColor  * color * lightPower * cosTheta
+		  			  + shinyness * specularColor * color * lightPower * pow(cosAlpha, specularity);
 
 	fragmentColor.a = transparency;
 }

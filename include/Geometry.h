@@ -13,13 +13,14 @@
 #include "utils/Util.h"
 #include "utils/ObjectLoader.h"
 #include "utils/Shader.h"
+#include "../include/Layer.h"
 
 
 class Geometry {
 
 public:
 
-    Geometry(std::string, glm::vec3 c = glm::vec3(1.0f, 1.0f, 1.0f));
+    Geometry(std::string, glm::vec3 c = glm::vec3(1.0f, 1.0f, 1.0f), unsigned int n = 4, float l = 0.5f);
 
     ~Geometry();
 
@@ -27,17 +28,19 @@ public:
 
     void render(std::vector<glm::mat4>, float);
 
-    glm::vec3 &getColor()       { return mMaterial.color; }
+    glm::vec3 &getColor()        { return mMaterial.color; }
 
-    glm::vec3 &getAmbient()     { return mMaterial.ambient; }
+    glm::vec3 &getAmbient()      { return mMaterial.ambient; }
 
-    glm::vec3 &getDiffuse()     { return mMaterial.diffuse; }
+    glm::vec3 &getDiffuse()      { return mMaterial.diffuse; }
 
-    glm::vec3 &getSpecular()    { return mMaterial.specular; }
+    glm::vec3 &getSpecular()     { return mMaterial.specular; }
 
-    float     &getSpecularity() { return mMaterial.specularity; }
+    float     &getSpecularity()  { return mMaterial.specularity; }
 
-    float     &getShinyness()   { return mMaterial.shinyness; }
+    float     &getTransparency() { return mMaterial.transparency; }
+
+    float     &getShinyness()    { return mMaterial.shinyness; }
 
 private:
 
@@ -58,6 +61,8 @@ private:
     unsigned int getNumUvs() const { return mUvs.size(); }
 
     void buildRenderData();
+
+    void createFurLayers();
 
 
     // Structs
@@ -95,7 +100,7 @@ private:
                  const glm::vec3 & s = glm::vec3(1.0f, 1.0f, 1.0f),
                  float t             = 1.0f,
                  float sp            = 25.0f,
-                 float sh            = 0.7f)
+                 float sh            = 0.3f)
             : color(c),
               ambient(a),
               diffuse(d),
@@ -117,6 +122,10 @@ private:
     // Instance variables
 
     glm::mat4 modelMatrix;
+
+    unsigned int mNumberOfLayers;
+
+    float mFurLength;
 
 
     // Indices for shader stuff: arrays, buffers and programs
@@ -184,6 +193,8 @@ private:
     std::vector<glm::vec2> mRenderUvs;
 
     std::vector<glm::vec3> mRenderNormals;
+
+    std::vector<Layer *> mFurLayers;
 };
 
 #endif // GEOMETRY_H

@@ -21,6 +21,9 @@ void Scene::initialize() {
 	// Background color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	// Set up the camera
 	mCamera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
 

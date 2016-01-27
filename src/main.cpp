@@ -47,7 +47,7 @@ int main() {
     // Create scene here.
     scene = new Scene();
 
-    mesh = new Geometry("bunny", glm::vec3(0.8f, 0.5f, 0.5f));
+    mesh = new Geometry("blender_monkey", glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.1f);
 
     scene->addGeometry(mesh);
 
@@ -201,13 +201,22 @@ void initializeAntTweakBar() {
             " group='Material' label='Shinyness' min=0 max=1 step=0.01 help='Shinyness of material' "
         );
 
+    // Transparency of material
+    TwAddVarRW(
+            tweakbar, 
+            "Transparency", 
+            TW_TYPE_FLOAT, 
+            &mesh->getTransparency(),
+            " group='Material' label='Transparency' min=0 max=1 step=0.01 help='Transparency of material' "
+        );
+
     // Light source power
     TwAddVarRW(
             tweakbar, 
             "Power", 
             TW_TYPE_FLOAT, 
             &scene->getLightSourcePower(),
-            " group='Light Source' label='Power' min=0 max=25 step=1 help='Light Source Power' "
+            " group='Light Source' label='Power' min=0 max=2 step=0.05 help='Light Source Power' "
         );
 }
 

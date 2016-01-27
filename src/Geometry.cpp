@@ -1,11 +1,11 @@
 #include "../include/Geometry.h"
 
-Geometry::Geometry(std::string s, glm::vec3 c) {
+Geometry::Geometry(std::string s, glm::vec3 c, unsigned int n, float l)
+	: mNumberOfLayers(n), mFurLength(l) {
 
 	mMaterial.color = c;
 
 	std::string obj = PATH_OBJ + s + FILE_NAME_OBJ;
-
 	loadMesh(obj.c_str());
 }
 
@@ -18,13 +18,22 @@ Geometry::~Geometry() {
 	glDeleteProgram(shaderProgram);
 	glDeleteVertexArrays(1, &vertexArrayID);
 
+	for(unsigned int i = 0; i < mFurLayers.size(); i++) {
+		if(mFurLayers[i])
+			delete mFurLayers[i];
+	}
+
 	std::cout << "\nGeometry destroyed!\n" << std::endl;
 }
 
 
 void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
 
+	// First create render data
 	buildRenderData();
+
+	// Then create fur layers since they use the render data from the geometry
+	createFurLayers();
 
 	glGenVertexArrays(1, &vertexArrayID);
     glBindVertexArray(vertexArrayID);
@@ -97,6 +106,9 @@ void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
     	reinterpret_cast<void*>(0)		// array buffer offset, 0
     );
 
+    for(std::vector<Layer *>::iterator it = mFurLayers.begin(); it != mFurLayers.end(); ++it)
+    	(*it)->initialize(lightPosition, cameraPosition);
+
     std::cout << "\nGeometry initialized!\n";
 }
 
@@ -146,8 +158,12 @@ void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower) {
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
 
-	glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
+
+	for(std::vector<Layer *>::iterator it = mFurLayers.begin(); it != mFurLayers.end(); ++it)
+    	(*it)->render(matrices, lightSourcePower);
+
+    glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
 }
 
 
@@ -290,4 +306,17 @@ void Geometry::buildRenderData() {
 		mRenderNormals.push_back(mVerts[mFaces[i].v2].normal);
 		mRenderNormals.push_back(mVerts[mFaces[i].v3].normal);
 	}
+}
+
+
+void Geometry::createFurLayers() {
+
+	mFurLayers.resize(mNumberOfLayers);
+
+	float offset = 0.0f;
+
+	float stepLength = mFurLength / static_cast<float>(mNumberOfLayers);
+
+	for(unsigned int i = 0; i < mNumberOfLayers; i++)
+		mFurLayers[i] = new Layer(mRenderVerts, mRenderUvs, mRenderNormals, offset += stepLength);
 }
