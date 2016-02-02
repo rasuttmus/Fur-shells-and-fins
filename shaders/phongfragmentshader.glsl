@@ -40,5 +40,7 @@ void main() {
 		  			  + diffuseColor  * color * lightPower * cosTheta
 		  			  + shinyness * specularColor * color * lightPower * pow(cosAlpha, specularity);
 
+    //fragmentColor.rgb = texture( textureSampler, UV ).rgb;
+
 	fragmentColor.a = transparency;
 }

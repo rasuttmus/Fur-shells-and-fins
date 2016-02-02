@@ -28,6 +28,8 @@ public:
 
     void render(std::vector<glm::mat4>, float);
 
+    void updateFur();
+
     glm::vec3 &getColor()        { return mMaterial.color; }
 
     glm::vec3 &getAmbient()      { return mMaterial.ambient; }
@@ -41,6 +43,8 @@ public:
     float     &getTransparency() { return mMaterial.transparency; }
 
     float     &getShinyness()    { return mMaterial.shinyness; }
+
+    float     &getFurLength()    { return mFurLength; }
 
 private:
 

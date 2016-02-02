@@ -47,7 +47,7 @@ int main() {
     // Create scene here.
     scene = new Scene();
 
-    mesh = new Geometry("blender_monkey", glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.1f);
+    mesh = new Geometry("sphere", glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.12f);
 
     scene->addGeometry(mesh);
 
@@ -69,7 +69,7 @@ int main() {
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //mesh->setSpecularity(specularity);
+        mesh->updateFur();
 
         // Render scene
         scene->render();
@@ -216,7 +216,16 @@ void initializeAntTweakBar() {
             "Power", 
             TW_TYPE_FLOAT, 
             &scene->getLightSourcePower(),
-            " group='Light Source' label='Power' min=0 max=2 step=0.05 help='Light Source Power' "
+            " group='Light Source' label='Power' min=0 max=2 step=0.05 help='Light source power' "
+        );
+
+    // Fur length
+    TwAddVarRW(
+            tweakbar, 
+            "Length", 
+            TW_TYPE_FLOAT, 
+            &mesh->getFurLength(),
+            " group='Fur' label='Length' min=0.01 max=1.0 step=0.005 help='Length of fur' "
         );
 }
 

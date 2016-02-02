@@ -17,6 +17,8 @@ void Layer::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
 	glGenVertexArrays(1, &vertexArrayID);
     glBindVertexArray(vertexArrayID);
 
+    generateTexture();
+
     shaderProgram = LoadShaders("shaders/furvertexshader.glsl", "shaders/furfragmentshader.glsl");
 
     // Bind shader variables (uniforms) to indices
@@ -34,6 +36,8 @@ void Layer::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
     transparencyLoc = glGetUniformLocation(shaderProgram, "transparency");
     lightPowerLoc   = glGetUniformLocation(shaderProgram, "lightPower");
     offsetLoc		= glGetUniformLocation(shaderProgram, "layerOffset");
+    furLengthLoc    = glGetUniformLocation(shaderProgram, "furLength");
+    noiseTextureLoc = glGetUniformLocation(shaderProgram, "textureSampler");
 
     glUniform3f(lightPosLoc,  lightPosition[0],  lightPosition[1],  lightPosition[2]);
     glUniform3f(cameraPosLoc, cameraPosition[0], cameraPosition[1], cameraPosition[2]);
@@ -86,10 +90,12 @@ void Layer::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
 
 void Layer::render(std::vector<glm::mat4> matrices, float lightSourcePower) {
 
-	//glEnable( GL_CULL_FACE );
-    //glEnable(GL_DEPTH_TEST);
-
 	glUseProgram(shaderProgram);
+
+    // Set active tex-unit and bind texture
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, noiseTextureID);
+    glUniform1i(noiseTextureLoc, 0);
 
 	// Pass data to shaders as uniforms
 	glUniformMatrix4fv(MVPLoc, 	   		1, 						 GL_FALSE, 				&matrices[I_MVP][0][0]);
@@ -104,6 +110,7 @@ void Layer::render(std::vector<glm::mat4> matrices, float lightSourcePower) {
 	glUniform1f( 	   transparencyLoc, mMaterial.transparency);
 	glUniform1f(	   lightPowerLoc,   lightSourcePower);
 	glUniform1f(	   offsetLoc,	    mOffset);
+    glUniform1f(       furLengthLoc,    mFurLength);
 
 	
 	// Rebind vertex, uv, and normal data, since everything is updated every frame
@@ -126,7 +133,44 @@ void Layer::render(std::vector<glm::mat4> matrices, float lightSourcePower) {
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+}
 
-	//glDisable(GL_DEPTH_TEST);
-    //glDisable(GL_CULL_FACE);
+
+void Layer::generateTexture() {
+
+    // Allocate the needed space.
+    int width;
+    int height;
+    width = height = 512;
+    unsigned int x = 0, y = 0;
+    float noiseScale = 1.0f;
+
+    textureData.resize(width * height * 4);
+    for (unsigned int i = 0; i < textureData.size(); i+=4) {
+        if(i%(width*4) == 0 && i != 0) {
+            y++;
+            x = 0;
+        }
+
+        textureData[i]   = snoise2(static_cast<float>((x * noiseScale)), static_cast<float>((y * noiseScale))) * 255.0f;
+        textureData[i+1] = snoise2(static_cast<float>((x * noiseScale)), static_cast<float>((y * noiseScale))) * 255.0f;
+        textureData[i+2] = snoise2(static_cast<float>((x * noiseScale)), static_cast<float>((y * noiseScale))) * 255.0f;
+        textureData[i+3] = 255;
+
+        /*if(i%(width*4) == 0 && i != 0) {
+            std::cout << "i: " << i << std::endl;
+        }*/
+
+        x++;
+    }
+
+    std::cout << "x,y: " << x << ", " << y << std::endl;
+
+    // Generate white OpenGL texture.
+    glGenTextures(1, &noiseTextureID);
+    glBindTexture(GL_TEXTURE_2D, noiseTextureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, &textureData[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
 }

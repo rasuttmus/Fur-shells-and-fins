@@ -10,6 +10,7 @@
 
 #include "utils/Util.h"
 #include "utils/Shader.h"
+#include "utils/Simplexnoise1234.h"
 
 
 class Layer {
@@ -23,6 +24,12 @@ public:
 	void initialize(glm::vec3, glm::vec3);
 
 	void render(std::vector<glm::mat4>, float);
+
+    void generateTexture();
+
+    void setOffset(float o) { mOffset = o; }
+
+    void setFurLength(float l) { mFurLength = l; }
 
 private:
 
@@ -48,6 +55,8 @@ private:
 
 	float mOffset;
 
+    float mFurLength;
+
 	// Indices for shader stuff: arrays, buffers and programs
 
     GLuint vertexArrayID;
@@ -57,6 +66,10 @@ private:
     GLuint uvBuffer;
 
     GLuint normalBuffer;
+
+    GLuint noiseTextureID;
+
+    GLuint noiseTextureLoc;
 
     GLuint shaderProgram;
 
@@ -90,6 +103,10 @@ private:
 
     GLint offsetLoc;
 
+    GLint furLengthLoc;
+
+    GLint layerIndexLoc;
+
 	// Containers
 
 	std::vector<glm::vec3> mRenderVerts;
@@ -97,6 +114,8 @@ private:
 	std::vector<glm::vec2> mRenderUvs;
 
 	std::vector<glm::vec3> mRenderNormals;
+
+    std::vector<GLubyte> textureData;
 
 };
 

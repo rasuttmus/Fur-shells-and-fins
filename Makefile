@@ -13,7 +13,7 @@ LIBFOLD = -L"/usr/local/lib"
 INCFOLD = -I"/usr/local/include"
 
 # Files:
-FILES = $(wildcard src/*.cpp) $(wildcard shaders/*.cpp) $(wildcard src/utils/*.cpp)
+FILES = $(wildcard src/*.cpp) $(wildcard shaders/*.cpp) $(wildcard src/utils/*.cpp) $(wildcard src/utils/*.c)
 
 # Binary folder:
 BINFOLD = bin/
