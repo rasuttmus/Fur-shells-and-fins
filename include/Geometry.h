@@ -20,13 +20,13 @@ class Geometry {
 
 public:
 
-    Geometry(std::string, glm::vec3 c = glm::vec3(1.0f, 1.0f, 1.0f), unsigned int n = 4, float l = 0.5f);
+    Geometry(std::vector<std::string>, glm::vec3 c = glm::vec3(1.0f, 1.0f, 1.0f), unsigned int n = 4, float l = 0.5f);
 
     ~Geometry();
 
     void       initialize(glm::vec3, glm::vec3);
 
-    void       render(std::vector<glm::mat4>, float);
+    void       render(std::vector<glm::mat4>, float, float);
 
     void       updateFur(float);
 
@@ -159,6 +159,10 @@ private:
     int mTextureHeight;
 
     glm::vec3 mRotation;
+
+    std::string mTextureName;
+
+    std::string mHairMapName;
 
 
     // Indices for shader stuff: arrays, buffers and programs

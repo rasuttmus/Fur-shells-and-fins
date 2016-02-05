@@ -14,6 +14,7 @@ uniform mat4  MVLight;
 uniform vec3  lightPosition;
 uniform float layerOffset;
 uniform float currentTime;
+uniform float windVelocity;
 uniform int   numberOfLayers;
 uniform int   layerIndex;
 uniform sampler2D hairMapSampler;
@@ -108,12 +109,12 @@ void main() {
 
 	vec3 windDirection = vec3(0.0, 0.0, 0.0);
 
-	windDirection.x = sin(currentTime * 3.0 + cos(snoise(vec2(currentTime, currentTime * 0.2)) * 0.5)) * 8.0;
-	windDirection.y = cos(currentTime * 2.0 + sin(snoise(vec2(currentTime * 0.05, currentTime)) * 0.5)) * 8.0;
+	windDirection.x = sin(currentTime * 3.0 + cos(snoise(vec2(currentTime, currentTime * 0.2)) * 0.5)) * 8.0 * windVelocity;
+	windDirection.y = cos(currentTime * 2.0 + sin(snoise(vec2(currentTime * 0.05, currentTime)) * 0.5)) * 8.0 * windVelocity;
 
 	float displacementFactor = pow(float(layerIndex) / float(numberOfLayers) * 0.5, 3.0) * layerOffset;
 	
-	vec3 displacement = (windDirection) * displacementFactor;
+	vec3 displacement = windDirection * displacementFactor;
 
 	vec3 aNormal = vertexNormal;
 

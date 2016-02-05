@@ -31,7 +31,7 @@ Layer::~Layer() {
 void Layer::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
 
     // Generate hairmap
-    std::string hairMapName = "assets/textures/test_2.png";
+    std::string hairMapName = PATH_TEX + mHairMapName + FILE_NAME_PNG;
     int hairMapHeight, hairMapWidth;
     hairMapID = loadTexture(hairMapName, hairMapWidth, hairMapHeight);
 
@@ -64,6 +64,7 @@ void Layer::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
     furNoiseLengthVariationLoc = glGetUniformLocation(shaderProgram, "furNoiseLengthVariation");
     furNoiseSampleScaleLoc     = glGetUniformLocation(shaderProgram, "furNoiseSampleScale");
     currentTimeLoc             = glGetUniformLocation(shaderProgram, "currentTime");
+    windVelocityLoc            = glGetUniformLocation(shaderProgram, "windVelocity");
 
 
     glUniform3f(lightPosLoc,  lightPosition[0],  lightPosition[1],  lightPosition[2]);
@@ -115,7 +116,7 @@ void Layer::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
 }
 
 
-void Layer::render(std::vector<glm::mat4> matrices, float lightSourcePower) {
+void Layer::render(std::vector<glm::mat4> matrices, float lightSourcePower, float windVelocity) {
 
     glUseProgram(shaderProgram);
 
@@ -157,6 +158,7 @@ void Layer::render(std::vector<glm::mat4> matrices, float lightSourcePower) {
     glUniform1f(       furNoiseLengthVariationLoc, mFurNoiseLengthVariation);
     glUniform1f(       furNoiseSampleScaleLoc,     mFurNoiseSampleScale);
     glUniform1f(       currentTimeLoc,             mCurrentTime);
+    glUniform1f(       windVelocityLoc,            windVelocity);
 
 
     // Rebind vertex, uv, and normal data, since everything is updated every frame

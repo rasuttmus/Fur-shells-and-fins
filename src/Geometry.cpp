@@ -1,11 +1,18 @@
 #include "../include/Geometry.h"
 
-Geometry::Geometry(std::string s, glm::vec3 c, unsigned int n, float l)
+Geometry::Geometry(std::vector<std::string> S, glm::vec3 c, unsigned int n, float l)
     : mNumberOfLayers(n), mFurLength(l) {
 
     mMaterial.color = c;
 
-    std::string obj = PATH_OBJ + s + FILE_NAME_OBJ;
+    mTextureName = S[I_TEXTURE];
+    mHairMapName = S[I_HAIRMAP];
+
+    mTextureWidth = mTextureHeight = std::stoi(S[I_TEXSIZE], nullptr, 0);
+
+    std::cout << "TEXSIZE: " << mTextureWidth << std::endl;
+
+    std::string obj = PATH_OBJ + S[I_FILENAME] + FILE_NAME_OBJ;
     loadMesh(obj.c_str());
 }
 
@@ -33,7 +40,7 @@ void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
     generateTexture();
 
     // Generate skin texture
-    std::string skinTexturename = "assets/textures/monkey_tex.png";
+    std::string skinTexturename = PATH_TEX + mTextureName + FILE_NAME_PNG;
     int skinTextureHeight, skinTextureWidth;
     skinTextureID = loadTexture(skinTexturename, skinTextureWidth, skinTextureHeight);
 
@@ -121,7 +128,7 @@ void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
 }
 
 
-void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower) {
+void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower, float windVelocity) {
 
     glEnable( GL_CULL_FACE );
     glEnable(GL_DEPTH_TEST);
@@ -172,7 +179,7 @@ void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower) {
 
 
     for(std::vector<Layer *>::iterator it = mFurLayers.begin(); it != mFurLayers.end(); ++it)
-        (*it)->render(matrices, lightSourcePower);
+        (*it)->render(matrices, lightSourcePower, windVelocity);
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
@@ -336,13 +343,14 @@ void Geometry::createFurLayers() {
         mFurLayers[i]->setFurNoiseLengthVariation(mFurNoiseLengthVariation);
         mFurLayers[i]->setFurNoiseSampleScale(mFurNoiseSampleScale);
         mFurLayers[i]->generateTexture(mTextureData, mTextureWidth, mTextureHeight);
+        mFurLayers[i]->setHairMapName(mHairMapName);
     }
 }
 
 
 void Geometry::generateTexture() {
 
-    mTextureWidth = mTextureHeight = 1024;
+    //mTextureWidth = mTextureHeight = 1024;
     unsigned int x = 0, y = 0;
     float noiseScale = 1.0f;
 

@@ -28,7 +28,7 @@ public:
 
 	void initialize(glm::vec3, glm::vec3);
 
-	void render(std::vector<glm::mat4>, float);
+	void render(std::vector<glm::mat4>, float, float);
 
     void update(float);
 
@@ -51,6 +51,8 @@ public:
     void setCurrentTime(float t)             { mCurrentTime = t; }
 
     void setHairMapID(GLuint t)              { hairMapID = t; }
+
+    void setHairMapName(std::string s)       { mHairMapName = s; }
 
 private:
 
@@ -96,6 +98,8 @@ private:
     glm::mat4 mRotationMatrix   = glm::mat4(1.0);
 
     glm::vec2 mScreenCoordMovement = glm::vec2(0.0f, 0.0f);
+
+    std::string mHairMapName;
 
 
 	// Indices for shader stuff: arrays, buffers and programs
@@ -166,6 +170,8 @@ private:
     GLint furNoiseSampleScaleLoc;
 
     GLint currentTimeLoc;
+
+    GLint windVelocityLoc;
 
 
 	// Containers

@@ -18,6 +18,7 @@ void mouseMotion(GLFWwindow *, double, double);
 void mouseScroll(GLFWwindow *, double, double);
 void keyboardInput(GLFWwindow *, int, int, int, int);
 double calculateFPS(double, std::string);
+void loadGeometryData();
 
 
 // pointer objects
@@ -31,6 +32,8 @@ Geometry * mesh;
 
 // global variables
 std::string windowTitle = "Fur - Shells and Fins";
+
+std::map<std::string, std::vector<std::string>> geometryData;
 
 
 int main() {
@@ -46,7 +49,9 @@ int main() {
     // Create scene here.
     scene = new Scene();
 
-    mesh = new Geometry("blender_monkey", glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f);
+    loadGeometryData();
+
+    mesh = new Geometry(geometryData["teapot"], glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f);
 
     scene->addGeometry(mesh);
 
@@ -158,11 +163,30 @@ void initializeAntTweakBar() {
     tweakbar = TwNewBar("Properties");
     TwDefine("Properties size='400 600' ");
 
+
+    // Light source power
+    TwAddVarRW(
+            tweakbar, 
+            "Power", 
+            TW_TYPE_FLOAT, 
+            &scene->getLightSourcePower(),
+            " group='Scene' label='Power' min=0 max=2 step=0.05 help='Light source power' "
+        );
+
+    // Wind velocity
+    TwAddVarRW(
+            tweakbar,
+            "Wind Velocity",
+            TW_TYPE_FLOAT,
+            &scene->getWindVelocity(),
+            " group='Scene' label='Wind velocity' min=0 max=1.5 step=0.05 help='Wind velocity' "
+        );
+
     // Main color of material
     TwAddVarRW(tweakbar, 
             "Color", 
             TW_TYPE_COLOR3F, 
-            &mesh->getColor(), 
+            &mesh->getColor(),
             " group='Material' label='Color' "
         );
 
@@ -215,15 +239,6 @@ void initializeAntTweakBar() {
             TW_TYPE_FLOAT, 
             &mesh->getTransparency(),
             " group='Material' label='Transparency' min=0 max=1 step=0.01 help='Transparency of material' "
-        );
-
-    // Light source power
-    TwAddVarRW(
-            tweakbar, 
-            "Power", 
-            TW_TYPE_FLOAT, 
-            &scene->getLightSourcePower(),
-            " group='Light Source' label='Power' min=0 max=2 step=0.05 help='Light source power' "
         );
 
     // Fur main color
@@ -386,3 +401,53 @@ double calculateFPS(double timeInterval = 1.0, std::string windowTitle = "NONE")
     // Return the current FPS - doesn't have to be used if you don't want it!
     return fps;
 }
+
+
+void loadGeometryData() {
+
+    std::vector<std::string> data;
+    data.resize(4);
+
+    data[I_FILENAME] = "blender_monkey";
+    data[I_TEXTURE]  = "monkey_tex";
+    data[I_HAIRMAP]  = "monkey_hairmap";
+    data[I_TEXSIZE]  = "1024";
+
+    geometryData.insert(std::pair< std::string, std::vector<std::string> >("monkey", data));
+
+    data[I_FILENAME] = "bunny";
+    data[I_TEXTURE]  = "bunny_tex";
+    data[I_HAIRMAP]  = "bunny_hairmap";
+    data[I_TEXSIZE]  = "1024";
+
+    geometryData.insert(std::pair< std::string, std::vector<std::string> >("bunny", data));
+
+    data[I_FILENAME] = "sphere";
+    data[I_TEXTURE]  = "bunny_tex";
+    data[I_HAIRMAP]  = "bunny_hairmap";
+    data[I_TEXSIZE]  = "512";
+
+    geometryData.insert(std::pair< std::string, std::vector<std::string> >("sphere", data));
+
+    data[I_FILENAME] = "torus";
+    data[I_TEXTURE]  = "bunny_tex";
+    data[I_HAIRMAP]  = "bunny_hairmap";
+    data[I_TEXSIZE]  = "1024";
+
+    geometryData.insert(std::pair< std::string, std::vector<std::string> >("torus", data));
+
+    data[I_FILENAME] = "plane";
+    data[I_TEXTURE]  = "bunny_tex";
+    data[I_HAIRMAP]  = "bunny_hairmap";
+    data[I_TEXSIZE]  = "512";
+
+    geometryData.insert(std::pair< std::string, std::vector<std::string> >("plane", data));
+
+    data[I_FILENAME] = "teapot";
+    data[I_TEXTURE]  = "bunny_tex";
+    data[I_HAIRMAP]  = "bunny_hairmap";
+    data[I_TEXSIZE]  = "256";
+
+    geometryData.insert(std::pair< std::string, std::vector<std::string> >("teapot", data));
+}
+

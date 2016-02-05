@@ -4,13 +4,18 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-// Indices for matrices in the scene
+// Indices for matrices in the scene and data of the geometry
 #define I_MVP 		0
 #define I_MV  		1
 #define I_M  		2
 #define I_V  		2
 #define I_MV_LIGHT  3
 #define I_NM		4
+
+#define I_FILENAME	0
+#define I_TEXTURE	1
+#define I_HAIRMAP	2
+#define I_TEXSIZE	3
 
 #include <glm/vec3.hpp>
 
@@ -37,7 +42,9 @@ namespace glm {
 
 // Constants
 const std::string PATH_OBJ = "assets/";
+const std::string PATH_TEX = "assets/textures/";
 const std::string FILE_NAME_OBJ = ".obj";
+const std::string FILE_NAME_PNG = ".png";
 
 const static unsigned int UNINITIALIZED = (std::numeric_limits<unsigned int>::max)();
 

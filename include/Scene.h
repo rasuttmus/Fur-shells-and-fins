@@ -34,6 +34,8 @@ public:
 
     float &getLightSourcePower() 			      { return mLightSource.power; }
 
+    float &getWindVelocity()	 			      { return mWindVelocity; }
+
     void   setCurrentTime(float t);
 
 private:
@@ -41,6 +43,8 @@ private:
 	// Instance varialbes
 
 	Camera * mCamera = nullptr;
+
+	float mWindVelocity = 1.0;
 
 
 	// Containers
