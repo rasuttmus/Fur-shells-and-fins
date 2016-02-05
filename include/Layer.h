@@ -16,7 +16,6 @@
 #include "utils/Util.h"
 #include "utils/Shader.h"
 #include "utils/Simplexnoise1234.h"
-#include "utils/TGAloader.h"
 
 
 class Layer {
@@ -97,8 +96,6 @@ private:
     glm::mat4 mRotationMatrix   = glm::mat4(1.0);
 
     glm::vec2 mScreenCoordMovement = glm::vec2(0.0f, 0.0f);
-
-    Texture texture;
 
 
 	// Indices for shader stuff: arrays, buffers and programs
