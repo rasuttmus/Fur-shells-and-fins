@@ -14,23 +14,27 @@ public:
 
 	~Scene();
 
-	void initialize();
+	void   initialize();
 
-	void render();
+	void   render();
 
-	void addGeometry(Geometry * G) { mGeometries.push_back(G); }
+	void   update(float);
 
-	void updateCameraPosition(double, double);
+	void   addGeometry(Geometry * G) 			  { mGeometries.push_back(G); }
 
-    void updateCameraZoom(double, double);
+	void   updateCameraPosition(double, double);
+
+    void   updateCameraZoom(double, double);
     
-    void mousePress(double x, double y) { mCamera->dragStart(x, y); }
+    void   mousePress(double x, double y) 	   	  { mCamera->dragStart(x, y); }
     
-    void mouseRelease() { mCamera->dragEnd(); }
+    void   mouseRelease() 					      { mCamera->dragEnd(); }
 
-    void resetCamera();
+    void   resetCamera();
 
-    float &getLightSourcePower() { return mLightSource.power; }
+    float &getLightSourcePower() 			      { return mLightSource.power; }
+
+    void   setCurrentTime(float t);
 
 private:
 

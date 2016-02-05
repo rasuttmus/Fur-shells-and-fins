@@ -24,27 +24,39 @@ public:
 
     ~Geometry();
 
-    void initialize(glm::vec3, glm::vec3);
+    void       initialize(glm::vec3, glm::vec3);
 
-    void render(std::vector<glm::mat4>, float);
+    void       render(std::vector<glm::mat4>, float);
 
-    void updateFur();
+    void       updateFur(float);
 
-    glm::vec3 &getColor()        { return mMaterial.color; }
+    GLuint     loadTexturePNG(const std::string, int &, int &);
 
-    glm::vec3 &getAmbient()      { return mMaterial.ambient; }
+    glm::vec3 &getColor()                         { return mMaterial.color; }
 
-    glm::vec3 &getDiffuse()      { return mMaterial.diffuse; }
+    glm::vec3 &getFurColor()                      { return mMaterial.furColor; }
 
-    glm::vec3 &getSpecular()     { return mMaterial.specular; }
+    glm::vec3 &getAmbient()                       { return mMaterial.ambient; }
 
-    float     &getSpecularity()  { return mMaterial.specularity; }
+    glm::vec3 &getDiffuse()                       { return mMaterial.diffuse; }
 
-    float     &getTransparency() { return mMaterial.transparency; }
+    glm::vec3 &getSpecular()                      { return mMaterial.specular; }
 
-    float     &getShinyness()    { return mMaterial.shinyness; }
+    float     &getSpecularity()                   { return mMaterial.specularity; }
 
-    float     &getFurLength()    { return mFurLength; }
+    float     &getTransparency()                  { return mMaterial.transparency; }
+
+    float     &getShinyness()                     { return mMaterial.shinyness; }
+
+    float     &getFurLength()                     { return mFurLength; }
+
+    float     &getFurNoiseLengthVariation()       { return mFurNoiseLengthVariation; }
+
+    float     &getFurNoiseSampleScale()           { return mFurNoiseSampleScale; }
+
+    void       setScreenCoordMovement(glm::vec2);
+
+    void       setCurrentTime(float t);
 
 private:
 
@@ -67,6 +79,10 @@ private:
     void buildRenderData();
 
     void createFurLayers();
+
+    void generateTexture();
+
+    GLuint loadTexture(const std::string filename, int &width, int &height);
 
 
     // Structs
@@ -99,6 +115,7 @@ private:
 
     struct Material {
         Material(const glm::vec3 & c = glm::vec3(1.0f, 1.0f, 1.0f),
+                 const glm::vec3 & f = glm::vec3(1.0f, 1.0f, 1.0f),
                  const glm::vec3 & a = glm::vec3(0.3f, 0.3f, 0.3f),
                  const glm::vec3 & d = glm::vec3(0.8f, 0.8f, 0.8f),
                  const glm::vec3 & s = glm::vec3(1.0f, 1.0f, 1.0f),
@@ -106,6 +123,7 @@ private:
                  float sp            = 25.0f,
                  float sh            = 0.3f)
             : color(c),
+              furColor(f),
               ambient(a),
               diffuse(d),
               specular(s),
@@ -114,6 +132,7 @@ private:
               shinyness(sh) {}
 
         glm::vec3 color;
+        glm::vec3 furColor;
         glm::vec3 ambient;
         glm::vec3 diffuse;
         glm::vec3 specular;
@@ -131,6 +150,16 @@ private:
 
     float mFurLength;
 
+    float mFurNoiseLengthVariation = 0.2f;
+
+    float mFurNoiseSampleScale = 1.5f;
+
+    int mTextureWidth;
+
+    int mTextureHeight;
+
+    glm::vec3 mRotation;
+
 
     // Indices for shader stuff: arrays, buffers and programs
 
@@ -143,6 +172,10 @@ private:
     GLuint normalBuffer;
 
     GLuint shaderProgram;
+
+    GLuint skinTextureID;
+    
+    GLuint skinTextureLoc;
 
 
     // Uniform indices
@@ -199,6 +232,8 @@ private:
     std::vector<glm::vec3> mRenderNormals;
 
     std::vector<Layer *> mFurLayers;
+
+    std::vector<GLubyte> mTextureData;
 };
 
 #endif // GEOMETRY_H

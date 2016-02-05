@@ -62,13 +62,25 @@ void Scene::render() {
 }
 
 
+void Scene::update(float dt) {
+
+	for(std::vector<Geometry *>::iterator it = mGeometries.begin(); it != mGeometries.end(); ++it) {
+		(*it)->updateFur(dt);
+	}
+}
+
+
 void Scene::updateCameraPosition(double x, double y) {
     
     if(!mCamera->dragged())
         return;
 
     mCamera->rotate(mCamera->getOrientation(), x, y);
+
     mCamera->dragUpdate(x, y);
+
+    for(std::vector<Geometry *>::iterator it = mGeometries.begin(); it != mGeometries.end(); ++it)
+    	(*it)->setScreenCoordMovement(mCamera->getScreenCoordMovement());
 }
 
 
@@ -82,4 +94,11 @@ void Scene::updateCameraZoom(double x, double y) {
 void Scene::resetCamera() {
 
 	mCamera->reset();
+}
+
+
+void Scene::setCurrentTime(float t) {
+
+	for(std::vector<Geometry *>::iterator it = mGeometries.begin(); it != mGeometries.end(); ++it)
+		(*it)->setCurrentTime(t);
 }

@@ -32,33 +32,35 @@ public:
     
     void dragEnd();
     
-    bool dragged() const { return mDragged; }
+    bool dragged() const 				  { return mDragged; }
 
-    void center(float x, float y) { mCenterPosition.x = x; mCenterPosition.y = y; }
+    void center(float x, float y) 		  { mCenterPosition.x = x; mCenterPosition.y = y; }
 
     void reset();
 
-	glm::mat4 getModelMatrix() { return mModelMatrix; }
+	glm::mat4 getModelMatrix() 			  { return mModelMatrix; }
 
-	glm::mat4 getViewMatrix() { return mViewMatrix; }
+	glm::mat4 getViewMatrix() 			  { return mViewMatrix; }
 
-	glm::mat4 getProjectionMatrix() { return mProjectionMatrix; }
+	glm::mat4 getProjectionMatrix() 	  { return mProjectionMatrix; }
 
-	glm::vec3 getPosition() { return mPosition; }
+	glm::vec3 getPosition() 			  { return mPosition; }
 
-	glm::quat& getOrientation() { return mOrientation; }
+	glm::quat& getOrientation() 	   	  { return mOrientation; }
 
-	float getZoom() { return mZoom; }
+	float getZoom() 					  { return mZoom; }
 
-	void setModelMatrix(glm::mat4 M) { mModelMatrix = M; }
+	glm::vec2 getScreenCoordMovement() 	  { return mScreenCoordDifference; }
 
-	void setViewMatrix(glm::mat4 V) { mViewMatrix = V; }
+	void setModelMatrix(glm::mat4 M) 	  { mModelMatrix = M; }
+
+	void setViewMatrix(glm::mat4 V) 	  { mViewMatrix = V; }
 
 	void setProjectionMatrix(glm::mat4 P) { mProjectionMatrix = P; }
 
-	void setOrientation(glm::quat O) { mOrientation = O; }
+	void setOrientation(glm::quat O) 	  { mOrientation = O; }
 
-	void setZoom(float z) { mZoom = z; }
+	void setZoom(float z) 				  { mZoom = z; }
 
 private:
 
@@ -88,6 +90,12 @@ private:
     float mZoom;
     
     bool mDragged;
+
+    bool mFirstFrame = true;
+
+    glm::vec2 mPreviousScreenCoord;
+
+    glm::vec2 mScreenCoordDifference;
 };
 
 #endif // CAMERA_H

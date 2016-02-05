@@ -32,7 +32,6 @@ Geometry * mesh;
 // global variables
 std::string windowTitle = "Fur - Shells and Fins";
 
-float color[] = {0.0f, 0.0f, 0.0f};
 
 int main() {
 
@@ -47,7 +46,7 @@ int main() {
     // Create scene here.
     scene = new Scene();
 
-    mesh = new Geometry("sphere", glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.12f);
+    mesh = new Geometry("blender_monkey", glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f);
 
     scene->addGeometry(mesh);
 
@@ -63,13 +62,20 @@ int main() {
     glfwSetScrollCallback(window, mouseScroll);
     glfwSetKeyCallback(window, keyboardInput);
 
+    float time, previousTime = 0;
+
     // Render-loop
     do {
         calculateFPS(1.0, windowTitle);
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        mesh->updateFur();
+        time = static_cast<float>(glfwGetTime());
+
+        scene->update(time - previousTime);
+        scene->setCurrentTime(time);
+
+        previousTime = time;
 
         // Render scene
         scene->render();
@@ -145,6 +151,7 @@ void initializeAntTweakBar() {
 
     TwInit(TW_OPENGL_CORE, NULL);
 
+    // Another retina hack
     TwWindowSize(WIDTH * 1.96, HEIGHT * 1.96);
 
     // Create tweakbar and set its size
@@ -219,13 +226,39 @@ void initializeAntTweakBar() {
             " group='Light Source' label='Power' min=0 max=2 step=0.05 help='Light source power' "
         );
 
+    // Fur main color
+    TwAddVarRW(tweakbar, 
+            "Fur Color", 
+            TW_TYPE_COLOR3F, 
+            &mesh->getFurColor(),
+            " group='Fur' label='Fur Color' "
+        );
+
     // Fur length
     TwAddVarRW(
             tweakbar, 
             "Length", 
             TW_TYPE_FLOAT, 
             &mesh->getFurLength(),
-            " group='Fur' label='Length' min=0.01 max=1.0 step=0.005 help='Length of fur' "
+            " group='Fur' label='Length' min=0.1 max=0.5 step=0.005 help='Length of fur' "
+        );
+
+    // Fur length variation
+    TwAddVarRW(
+            tweakbar, 
+            "Length Variation", 
+            TW_TYPE_FLOAT, 
+            &mesh->getFurNoiseLengthVariation(),
+            " group='Fur' label='Length Variation' min=0.0 max=0.5 step=0.01 help='Length variation of fur strands' "
+        );
+
+    // Fur length variation sample scale
+    TwAddVarRW(
+            tweakbar, 
+            "Length Variation Sample Scale", 
+            TW_TYPE_FLOAT, 
+            &mesh->getFurNoiseSampleScale(),
+            " group='Fur' label='Length Variation Sample Scale' min=0.5 max=20.0 step=0.1 help='Sample scale of length variation noise' "
         );
 }
 

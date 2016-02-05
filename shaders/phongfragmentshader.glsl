@@ -1,16 +1,17 @@
 #version 330 core
 
-uniform mat4  NM;
-uniform vec3  cameraPosition;
-uniform vec3  color;
-uniform vec3  ambientColor;
-uniform vec3  diffuseColor;
-uniform vec3  specularColor;
-uniform vec3  lightPosition;
-uniform float transparency;
-uniform float specularity;
-uniform float shinyness;
-uniform float lightPower;
+uniform mat4  	  NM;
+uniform vec3  	  cameraPosition;
+uniform vec3  	  color;
+uniform vec3  	  ambientColor;
+uniform vec3  	  diffuseColor;
+uniform vec3  	  specularColor;
+uniform vec3  	  lightPosition;
+uniform float 	  transparency;
+uniform float 	  specularity;
+uniform float 	  shinyness;
+uniform float 	  lightPower;
+uniform sampler2D skinTextureSampler;
 
 in vec3 normal;
 in vec3 vertexPositionWorldSpace;
@@ -36,9 +37,11 @@ void main() {
 
 	float cosAlpha = clamp(dot(E, R), 0, 1);
 
-	fragmentColor.rgb = ambientColor  * color
-		  			  + diffuseColor  * color * lightPower * cosTheta
-		  			  + shinyness * specularColor * color * lightPower * pow(cosAlpha, specularity);
+	vec3 textureColor = texture(skinTextureSampler, UV).rgb;
+
+	fragmentColor.rgb = ambientColor  * textureColor
+		  			  + diffuseColor  * textureColor * lightPower * cosTheta
+		  			  + shinyness * specularColor * textureColor * lightPower * pow(cosAlpha, specularity);
 
     //fragmentColor.rgb = texture( textureSampler, UV ).rgb;
 

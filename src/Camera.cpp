@@ -77,6 +77,26 @@ void Camera::dragUpdate(double x, double y) {
 
         mDragStartPosition.x = x - mCenterPosition.x;
         mDragStartPosition.y = y - mCenterPosition.y;
+
+        if((int)x != 0 && (int)y != 0) {
+            
+            if(mFirstFrame) {
+
+                mScreenCoordDifference = glm::vec2(0.0f, 0.0f);
+                mPreviousScreenCoord = glm::vec2(x, y);
+                mFirstFrame = false;
+                //std::cout << "FIRST FRAME!" << std::endl;
+            }
+
+            mScreenCoordDifference = glm::vec2(x, y) - mPreviousScreenCoord;
+
+            //std::cout << "current: " << x << ", " << y << "\tprev: " << mPreviousScreenCoord.x << ", " << mPreviousScreenCoord.y << "\tDiff:" << mScreenCoordDifference.x << ", " << mScreenCoordDifference.y << std::endl;
+            mPreviousScreenCoord = glm::vec2(x,y);
+
+        } else {
+
+            mFirstFrame = true;
+        }
     }
 }
 
