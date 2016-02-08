@@ -51,4 +51,6 @@ const static unsigned int UNINITIALIZED = (std::numeric_limits<unsigned int>::ma
 const int WIDTH = 1024;
 const int HEIGHT = 768;
 
+typedef enum { SIMPLEX, WORLEY } NoiseType;
+
 #endif // UTIL_H

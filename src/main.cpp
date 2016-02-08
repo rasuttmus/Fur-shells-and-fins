@@ -19,18 +19,50 @@ void mouseScroll(GLFWwindow *, double, double);
 void keyboardInput(GLFWwindow *, int, int, int, int);
 double calculateFPS(double, std::string);
 void loadGeometryData();
+void updateTweakBarVariables();
 
 
-// pointer objects
+// AntTweakBar variables
+
+// For meshes
+typedef enum { SPHERE, TORUS, PLANE, MONKEY, BUNNY, TEAPOT } Meshes;
+Meshes currentMesh = TORUS;
+TwEnumVal MeshesEV[] = { {SPHERE, "Sphere"}, {TORUS, "Torus"}, {PLANE, "Plane"}, {MONKEY, "Monkey"}, {BUNNY, "Bunny"}, {TEAPOT, "Teapot"} };
+TwType meshType;
+
+// For noise types
+NoiseType currentNoise = SIMPLEX;
+TwEnumVal NoiseTypesEV[] = { { SIMPLEX, "Simplex" }, { WORLEY, "Worley" } };
+TwType noiseType;
+
+// Variables for the tweakBar
+float furLength, specularity, transparency, shinyness, furNoiseLengthVariation, furNoiseSampleScale, furPatternScale;
+glm::vec3 skinColor, ambientColor, diffuseColor, specularColor, furColor;
+
+
+
+// Pointer objects
 GLFWwindow * window = nullptr;
 
 TwBar * tweakbar = nullptr;
 
 Scene * scene = nullptr;
 
-Geometry * mesh;
+Geometry * mesh = nullptr;
 
-// global variables
+Geometry * torus = nullptr;
+
+Geometry * sphere = nullptr;
+
+Geometry * plane = nullptr;
+
+Geometry * monkey = nullptr;
+
+Geometry * bunny = nullptr;
+
+Geometry * teapot = nullptr;
+
+// Global variables
 std::string windowTitle = "Fur - Shells and Fins";
 
 std::map<std::string, std::vector<std::string>> geometryData;
@@ -51,12 +83,24 @@ int main() {
 
     loadGeometryData();
 
-    mesh = new Geometry(geometryData["teapot"], glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f);
+    torus  = new Geometry(geometryData["torus"],  glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f);
+    sphere = new Geometry(geometryData["sphere"], glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f, false);
+    plane  = new Geometry(geometryData["plane"],  glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f, false);
+    monkey = new Geometry(geometryData["monkey"], glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f, false);
+    bunny  = new Geometry(geometryData["bunny"],  glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f, false);
+    teapot = new Geometry(geometryData["teapot"], glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f, false);
 
-    scene->addGeometry(mesh);
+    scene->addGeometry(torus);
+    scene->addGeometry(sphere);
+    scene->addGeometry(plane);
+    scene->addGeometry(monkey);
+    scene->addGeometry(bunny);
+    scene->addGeometry(teapot);
 
     // Initialize scene
     scene->initialize();
+
+    mesh = torus;
 
     // Initialze AntTweakBar
     initializeAntTweakBar();
@@ -79,6 +123,8 @@ int main() {
 
         scene->update(time - previousTime);
         scene->setCurrentTime(time);
+        
+        updateTweakBarVariables();
 
         previousTime = time;
 
@@ -161,8 +207,35 @@ void initializeAntTweakBar() {
 
     // Create tweakbar and set its size
     tweakbar = TwNewBar("Properties");
-    TwDefine("Properties size='400 600' ");
+    TwDefine("Properties size='400 700' ");
 
+    meshType = TwDefineEnum("MeshType", MeshesEV, 6);
+
+    noiseType = TwDefineEnum("NoiseType", NoiseTypesEV, 2);
+
+    furLength               = mesh->getFurLength();
+    skinColor               = mesh->getColor();
+    ambientColor            = mesh->getAmbient();
+    diffuseColor            = mesh->getDiffuse();
+    specularColor           = mesh->getSpecular();
+    furColor                = mesh->getFurColor();
+    specularity             = mesh->getSpecularity();
+    transparency            = mesh->getTransparency();
+    shinyness               = mesh->getShinyness();
+    furNoiseLengthVariation = mesh->getFurNoiseLengthVariation();
+    furNoiseSampleScale     = mesh->getFurNoiseSampleScale();
+    furPatternScale         = mesh->getFurPatternScale();
+
+
+    // Mesh to be rendered
+
+    TwAddVarRW(
+            tweakbar,
+            "Mesh",
+            meshType,
+            &currentMesh,
+            NULL
+        );
 
     // Light source power
     TwAddVarRW(
@@ -186,7 +259,7 @@ void initializeAntTweakBar() {
     TwAddVarRW(tweakbar, 
             "Color", 
             TW_TYPE_COLOR3F, 
-            &mesh->getColor(),
+            &skinColor,
             " group='Material' label='Color' "
         );
 
@@ -194,7 +267,7 @@ void initializeAntTweakBar() {
     TwAddVarRW(tweakbar, 
             "Ambient", 
             TW_TYPE_COLOR3F, 
-            &mesh->getAmbient(), 
+            &ambientColor, 
             " group='Material' label='Ambient' "
         );
 
@@ -202,7 +275,7 @@ void initializeAntTweakBar() {
     TwAddVarRW(tweakbar, 
             "Diffuse", 
             TW_TYPE_COLOR3F, 
-            &mesh->getDiffuse(), 
+            &diffuseColor, 
             " group='Material' label='Diffuse' "
         );
 
@@ -210,7 +283,7 @@ void initializeAntTweakBar() {
     TwAddVarRW(tweakbar, 
             "Specular", 
             TW_TYPE_COLOR3F, 
-            &mesh->getSpecular(), 
+            &specularColor, 
             " group='Material' label='Specular' "
         );
 
@@ -219,7 +292,7 @@ void initializeAntTweakBar() {
             tweakbar, 
             "Specularity", 
             TW_TYPE_FLOAT, 
-            &mesh->getSpecularity(),
+            &specularity,
             " group='Material' label='Specularity' min=1 max=50 step=1 help='Specularity of material' "
         );
 
@@ -228,7 +301,7 @@ void initializeAntTweakBar() {
             tweakbar, 
             "Shinyness", 
             TW_TYPE_FLOAT, 
-            &mesh->getShinyness(),
+            &shinyness,
             " group='Material' label='Shinyness' min=0 max=1 step=0.01 help='Shinyness of material' "
         );
 
@@ -237,7 +310,7 @@ void initializeAntTweakBar() {
             tweakbar, 
             "Transparency", 
             TW_TYPE_FLOAT, 
-            &mesh->getTransparency(),
+            &transparency,
             " group='Material' label='Transparency' min=0 max=1 step=0.01 help='Transparency of material' "
         );
 
@@ -245,7 +318,7 @@ void initializeAntTweakBar() {
     TwAddVarRW(tweakbar, 
             "Fur Color", 
             TW_TYPE_COLOR3F, 
-            &mesh->getFurColor(),
+            &furColor,
             " group='Fur' label='Fur Color' "
         );
 
@@ -254,7 +327,7 @@ void initializeAntTweakBar() {
             tweakbar, 
             "Length", 
             TW_TYPE_FLOAT, 
-            &mesh->getFurLength(),
+            &furLength,
             " group='Fur' label='Length' min=0.1 max=0.5 step=0.005 help='Length of fur' "
         );
 
@@ -263,7 +336,7 @@ void initializeAntTweakBar() {
             tweakbar, 
             "Length Variation", 
             TW_TYPE_FLOAT, 
-            &mesh->getFurNoiseLengthVariation(),
+            &furNoiseLengthVariation,
             " group='Fur' label='Length Variation' min=0.0 max=0.5 step=0.01 help='Length variation of fur strands' "
         );
 
@@ -272,8 +345,25 @@ void initializeAntTweakBar() {
             tweakbar, 
             "Length Variation Sample Scale", 
             TW_TYPE_FLOAT, 
-            &mesh->getFurNoiseSampleScale(),
+            &furNoiseSampleScale,
             " group='Fur' label='Length Variation Sample Scale' min=0.5 max=20.0 step=0.1 help='Sample scale of length variation noise' "
+        );
+
+    // Fur length variation sample scale
+    TwAddVarRW(
+            tweakbar, 
+            "Scale of the fur pattern", 
+            TW_TYPE_FLOAT, 
+            &furPatternScale,
+            " group='Fur' label='Pattern scale' min=0.0 max=20.0 step=0.1 help='Scale of the fur pattern' "
+        );
+
+    TwAddVarRW(
+            tweakbar,
+            "Noise type",
+            noiseType,
+            &currentNoise,
+            " group='Fur' label='Noise type' help='Type of noise function' "
         );
 }
 
@@ -449,5 +539,137 @@ void loadGeometryData() {
     data[I_TEXSIZE]  = "256";
 
     geometryData.insert(std::pair< std::string, std::vector<std::string> >("teapot", data));
+}
+
+
+void updateTweakBarVariables() {
+
+    switch(currentMesh) {
+
+        case TORUS:
+            
+            if(mesh != torus) {
+                torus->setShallRender(true);
+                sphere->setShallRender(false);
+                plane->setShallRender(false);
+                monkey->setShallRender(false);
+                bunny->setShallRender(false);
+                teapot->setShallRender(false);
+                mesh = torus;
+            }
+
+            break;
+
+        case SPHERE:
+            
+            if(mesh != sphere) {
+                sphere->setShallRender(true);
+                torus->setShallRender(false);
+                plane->setShallRender(false);
+                monkey->setShallRender(false);
+                bunny->setShallRender(false);
+                teapot->setShallRender(false);
+                mesh = sphere;
+            }
+
+            break;
+
+        case PLANE:
+            
+            if(mesh != plane) {
+                plane->setShallRender(true);
+                torus->setShallRender(false);
+                sphere->setShallRender(false);
+                monkey->setShallRender(false);
+                bunny->setShallRender(false);
+                teapot->setShallRender(false);
+                mesh = plane;
+            }
+
+            break;
+
+        case MONKEY:
+            
+            if(mesh != monkey) {
+                monkey->setShallRender(true);
+                torus->setShallRender(false);
+                sphere->setShallRender(false);
+                plane->setShallRender(false);
+                bunny->setShallRender(false);
+                teapot->setShallRender(false);
+                mesh = monkey;
+            }
+
+            break;
+
+        case BUNNY:
+            
+            if(mesh != bunny) {
+                bunny->setShallRender(true);
+                torus->setShallRender(false);
+                sphere->setShallRender(false);
+                plane->setShallRender(false);
+                monkey->setShallRender(false);
+                teapot->setShallRender(false);
+                mesh = bunny;
+            }
+
+            break;
+
+        case TEAPOT:
+            
+            if(mesh != teapot) {
+                teapot->setShallRender(true);
+                torus->setShallRender(false);
+                sphere->setShallRender(false);
+                plane->setShallRender(false);
+                monkey->setShallRender(false);
+                bunny->setShallRender(false);
+                mesh = teapot;
+            }
+
+            break;
+
+        default: 
+
+            break;
+    }
+
+
+    switch(currentNoise) {
+
+        case SIMPLEX:
+
+            if(mesh->getNoiseType() != SIMPLEX) {
+                mesh->setNoiseType(SIMPLEX);
+            }
+
+            break;
+
+        case WORLEY:
+
+            if(mesh->getNoiseType() != WORLEY) {
+                mesh->setNoiseType(WORLEY);
+            }
+
+            break;
+
+        default:
+
+            break;
+    }
+
+    mesh->setFurLength(furLength);
+    mesh->setColor(skinColor);
+    mesh->setAmbient(ambientColor);
+    mesh->setDiffuse(diffuseColor);
+    mesh->setSpecular(specularColor);
+    mesh->setFurColor(furColor);
+    mesh->setSpecularity(specularity);
+    mesh->setTransparency(transparency);
+    mesh->setShinyness(shinyness);
+    mesh->setFurNoiseLengthVariation(furNoiseLengthVariation);
+    mesh->setFurNoiseSampleScale(furNoiseSampleScale);
+    mesh->setFurPatternScale(furPatternScale);
 }
 

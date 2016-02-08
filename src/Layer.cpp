@@ -65,6 +65,8 @@ void Layer::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
     furNoiseSampleScaleLoc     = glGetUniformLocation(shaderProgram, "furNoiseSampleScale");
     currentTimeLoc             = glGetUniformLocation(shaderProgram, "currentTime");
     windVelocityLoc            = glGetUniformLocation(shaderProgram, "windVelocity");
+    furPatternScaleLoc         = glGetUniformLocation(shaderProgram, "furPatternScale");
+    noiseTypeLoc               = glGetUniformLocation(shaderProgram, "noiseType");
 
 
     glUniform3f(lightPosLoc,  lightPosition[0],  lightPosition[1],  lightPosition[2]);
@@ -159,6 +161,8 @@ void Layer::render(std::vector<glm::mat4> matrices, float lightSourcePower, floa
     glUniform1f(       furNoiseSampleScaleLoc,     mFurNoiseSampleScale);
     glUniform1f(       currentTimeLoc,             mCurrentTime);
     glUniform1f(       windVelocityLoc,            windVelocity);
+    glUniform1f(       furPatternScaleLoc,         mFurPatternScale);
+    glUniform1i(       noiseTypeLoc,               mNoiseType);
 
 
     // Rebind vertex, uv, and normal data, since everything is updated every frame

@@ -20,63 +20,83 @@ class Geometry {
 
 public:
 
-    Geometry(std::vector<std::string>, glm::vec3 c = glm::vec3(1.0f, 1.0f, 1.0f), unsigned int n = 4, float l = 0.5f);
+    Geometry(std::vector<std::string>, glm::vec3 c = glm::vec3(1.0f, 1.0f, 1.0f), unsigned int n = 4, float l = 0.5f, bool r = true);
 
     ~Geometry();
 
-    void       initialize(glm::vec3, glm::vec3);
+    void      initialize(glm::vec3, glm::vec3);
 
-    void       render(std::vector<glm::mat4>, float, float);
+    void      render(std::vector<glm::mat4>, float, float);
 
-    void       updateFur(float);
+    void      updateFur(float);
 
-    GLuint     loadTexturePNG(const std::string, int &, int &);
+    GLuint    loadTexturePNG(const std::string, int &, int &);
 
-    glm::vec3 &getColor()                         { return mMaterial.color; }
+    glm::vec3 getColor()                           { return mMaterial.color; }
 
-    glm::vec3 &getFurColor()                      { return mMaterial.furColor; }
+    glm::vec3 getFurColor()                        { return mMaterial.furColor; }
 
-    glm::vec3 &getAmbient()                       { return mMaterial.ambient; }
+    glm::vec3 getAmbient()                         { return mMaterial.ambient; }
 
-    glm::vec3 &getDiffuse()                       { return mMaterial.diffuse; }
+    glm::vec3 getDiffuse()                         { return mMaterial.diffuse; }
 
-    glm::vec3 &getSpecular()                      { return mMaterial.specular; }
+    glm::vec3 getSpecular()                        { return mMaterial.specular; }
 
-    float     &getSpecularity()                   { return mMaterial.specularity; }
+    float     getSpecularity()                     { return mMaterial.specularity; }
 
-    float     &getTransparency()                  { return mMaterial.transparency; }
+    float     getTransparency()                    { return mMaterial.transparency; }
 
-    float     &getShinyness()                     { return mMaterial.shinyness; }
+    float     getShinyness()                       { return mMaterial.shinyness; }
 
-    float     &getFurLength()                     { return mFurLength; }
+    float     getFurPatternScale()                 { return mMaterial.furPatternScale; }
 
-    float     &getFurNoiseLengthVariation()       { return mFurNoiseLengthVariation; }
+    float     getFurLength()                       { return mFurLength; }
 
-    float     &getFurNoiseSampleScale()           { return mFurNoiseSampleScale; }
+    float     getFurNoiseLengthVariation()         { return mFurNoiseLengthVariation; }
 
-    void       setScreenCoordMovement(glm::vec2);
+    float     getFurNoiseSampleScale()             { return mFurNoiseSampleScale; }
 
-    void       setCurrentTime(float t);
+    bool      getShallRender()                     { return mShallRender; }
+
+    int       getNoiseType()                       { return mNoiseType; }
+
+    void      setScreenCoordMovement(glm::vec2);
+
+    void      setCurrentTime(float t);
+
+    void      setShallRender(bool r)               { mShallRender = r; }
+
+    void      setFurLength(float l)                { mFurLength = l; }
+
+    void      setColor(glm::vec3 c)                { mMaterial.color = c; }
+
+    void      setAmbient(glm::vec3 a)              { mMaterial.ambient = a; }
+
+    void      setDiffuse(glm::vec3 d)              { mMaterial.diffuse = d; }
+
+    void      setSpecular(glm::vec3 s)             { mMaterial.specular = s; }
+
+    void      setFurColor(glm::vec3 f)             { mMaterial.furColor = f; }
+
+    void      setSpecularity(float sp)             { mMaterial.specularity = sp; }
+
+    void      setTransparency(float tr)            { mMaterial.transparency = tr; }
+
+    void      setShinyness(float sh)               { mMaterial.shinyness = sh; }
+
+    void      setFurPatternScale(float ps)         { mMaterial.furPatternScale = ps; }
+
+    void      setFurNoiseLengthVariation(float lv) { mFurNoiseLengthVariation = lv; }
+
+    void      setFurNoiseSampleScale(float ss)     { mFurNoiseSampleScale = ss; }
+
+    void      setNoiseType(int nt)                 { mNoiseType = nt; }
 
 private:
 
     // Functions
 
     bool loadMesh(const char *);
-
-    bool addFace(std::vector<glm::vec3>, std::vector<glm::vec2>, std::vector<glm::vec3>);
-
-    bool addVertex(const glm::vec3 &, glm::vec3, unsigned int &);
-
-    bool addUv(const glm::vec2 &, unsigned int &, unsigned int);
-
-    glm::vec3 faceNormal(unsigned int);
-
-    unsigned int getNumVerts() const { return mVerts.size(); }
-
-    unsigned int getNumUvs() const { return mUvs.size(); }
-
-    void buildRenderData();
 
     void createFurLayers();
 
@@ -87,32 +107,6 @@ private:
 
     // Structs
 
-    struct Face {
-        Face(const glm::vec3 & n = glm::vec3(0.0f, 0.0f, 0.0f)) 
-            : normal(n),
-              v1(UNINITIALIZED),
-              v2(UNINITIALIZED),
-              v3(UNINITIALIZED) {}
-
-        glm::vec3 normal;
-        unsigned int v1;
-        unsigned int v2;
-        unsigned int v3;
-    };
-
-    struct Vertex {
-        Vertex(const glm::vec3 & p = glm::vec3(0.0f, 0.0f, 0.0f),
-               const glm::vec3 & n = glm::vec3(0.0f, 0.0f, 0.0f),
-               const glm::vec2 & u = glm::vec2(0.0f, 0.0f))
-            : pos(p),
-              normal(n),
-              uv(u) {}
-
-        glm::vec3 pos;
-        glm::vec3 normal;
-        glm::vec2 uv;
-    };
-
     struct Material {
         Material(const glm::vec3 & c = glm::vec3(1.0f, 1.0f, 1.0f),
                  const glm::vec3 & f = glm::vec3(1.0f, 1.0f, 1.0f),
@@ -121,7 +115,8 @@ private:
                  const glm::vec3 & s = glm::vec3(1.0f, 1.0f, 1.0f),
                  float t             = 1.0f,
                  float sp            = 25.0f,
-                 float sh            = 0.3f)
+                 float sh            = 0.3f,
+                 float ps            = 4.0f)
             : color(c),
               furColor(f),
               ambient(a),
@@ -129,7 +124,8 @@ private:
               specular(s),
               transparency(t),
               specularity(sp),
-              shinyness(sh) {}
+              shinyness(sh),
+              furPatternScale(ps) {}
 
         glm::vec3 color;
         glm::vec3 furColor;
@@ -139,12 +135,11 @@ private:
         float transparency;
         float specularity;
         float shinyness;
+        float furPatternScale;
     } mMaterial;
 
 
     // Instance variables
-
-    glm::mat4 modelMatrix;
 
     unsigned int mNumberOfLayers;
 
@@ -163,6 +158,10 @@ private:
     std::string mTextureName;
 
     std::string mHairMapName;
+
+    bool mShallRender;
+
+    int mNoiseType;
 
 
     // Indices for shader stuff: arrays, buffers and programs
@@ -219,15 +218,15 @@ private:
 
     // Containers
 
-    std::map<glm::vec3, unsigned int> mUniqueVerts;
+    //std::map<glm::vec3, unsigned int> mUniqueVerts;
 
-    std::map<glm::vec2, unsigned int> mUniqueUvs;
+    //std::map<glm::vec2, unsigned int> mUniqueUvs;
 
-    std::vector<Face> mFaces;
+    //std::vector<Face> mFaces;
 
-    std::vector<Vertex> mVerts;
+    //std::vector<Vertex> mVerts;
 
-    std::vector<glm::vec2> mUvs;
+    //std::vector<glm::vec2> mUvs;
 
     std::vector<glm::vec3> mRenderVerts;
 

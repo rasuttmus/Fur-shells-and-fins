@@ -12,13 +12,13 @@ uniform float     layerOffset;
 uniform float     furLength;
 uniform int       numberOfLayers;
 uniform int       layerIndex;
+uniform int       noiseType;
 uniform float     furNoiseLengthVariation;
 uniform float     furNoiseSampleScale;
 uniform sampler2D textureSampler;
 uniform sampler2D hairMapSampler;
 
 in vec3 normal;
-in vec3 vertexPositionWorldSpace;
 in vec3 vertexPositionModelSpace;
 in vec3 lightDirectionCameraSpace;
 in vec2 UV;
@@ -42,17 +42,21 @@ vec3 mod289(vec3 x) {
     return x - floor(x * (1.0 / 289.0)) * 289.0;
 }
 
+
 vec4 mod289(vec4 x) {
     return x - floor(x * (1.0 / 289.0)) * 289.0;
 }
+
 
 vec4 permute(vec4 x) {
     return mod289(((x*34.0)+1.0)*x);
 }
 
+
 vec4 taylorInvSqrt(vec4 r) {
     return 1.79284291400159 - 0.85373472095314 * r;
 }
+
 
 float snoise(vec3 v) {
 
@@ -126,7 +130,7 @@ float snoise(vec3 v) {
 
 // Permutation polynomial: (34x^2 + x) mod 289
 vec3 permute(vec3 x) {
-  return mod((34.0 * x + 1.0) * x, 289.0);
+    return mod((34.0 * x + 1.0) * x, 289.0);
 }
 
 // Cellular noise, returning F1 and F2 in a vec2.
@@ -197,46 +201,47 @@ float aastep(float threshold, float value) {
 
 void main() {
 
-    float distance = length(lightPosition - vertexPositionWorldSpace);
+    noiseType;
 
-    vec3 n = normalize(normal);
-    vec3 l = normalize(lightDirectionCameraSpace);
-
+    // For diffuse shading
+    vec3 n         = normalize(normal);
+    vec3 l         = normalize(lightDirectionCameraSpace);
     float cosTheta = clamp(dot(n, l), 0, 1);
 
-    vec3 noiseColorSample = vertexPositionModelSpace * 1.0;
+    // The worley noise pattern on the fur
+    vec2  worleySample    = cellular2x2x2(UV3D * 0.2);
+    float sw              = fwidth(worleySample.x);
+    float darkSpotWorley  = smoothstep(0.4-sw, 0.6+sw, worleySample.x);
+    float lightSpotWorley = smoothstep(0.3-sw, 0.05+sw, worleySample.x);
+    float worleyColor     = darkSpotWorley + lightSpotWorley;
 
-    //noiseColorSample.y *= 0.2;
+    // The simplex noise pattern for the fur
+    float simplexSample   = snoise(UV3D * 0.2);
+    float simplexColor    = smoothstep(0.3, 0.1, simplexSample);
 
-    //float noiseColor = snoise(noiseColorSample);
-    vec3 UV3D = UV3D;
-    //_UV3D.y *= 0.001;
+    // Depending on the GUI input, pick the according noise function (simplex or worley)
+    float noise = (noiseType == 0) ? simplexColor : worleyColor;
 
-    vec2 worleySample = cellular2x2x2(UV3D * 0.2);
-    float s = fwidth(worleySample.x);
-    float darkSpotWorley = smoothstep(0.4-s, 0.6+s, worleySample.x);
-    float lightSpotWorley = smoothstep(0.3-s, 0.05+s, worleySample.x);
-
-    float noiseColor = darkSpotWorley + lightSpotWorley; //step(0.2, thresholdedWorley);
-
+    // Apply shading, the diffuse term is determined by the index of the current shell
     fragmentColor.rgb = ambientColor  * color
                       + diffuseColor  * color * lightPower * cosTheta * ( 2.5 * float(layerIndex) / float(numberOfLayers) );
 
-    fragmentColor.rgb *= (noiseColor * 0.8) + 0.2;
+    // Apply the worley noise color
+    fragmentColor.rgb *= (noise * 0.8) + 0.2;
 
-    vertexPositionModelSpace;
+    // Get value from fur noise texture
+    float furSample = texture(textureSampler, UV).r;
 
-    float furSample = texture( textureSampler, UV ).r;
-
+    // Get value from hair map texture, detrmines if there should be fur or not
     vec3 heightSample = texture(hairMapSampler, UV).rgb;
 
+    // Vary the fur length with some simplex noise
     float furLengthNoise = snoise(vertexPositionModelSpace * furNoiseSampleScale);
 
-    //fragmentColor.r = heightSample.x/2.0;
-    //fragmentColor.g = heightSample.y/2.0;
-    //fragmentColor.b = heightSample.z/2.0;
-
+    // This where everything comes together, the noise texture is thresholded depending on a lot of factors
     furSample = aastep(0.2 + (float(layerIndex) / float(numberOfLayers) * 0.8) + (furLengthNoise * furNoiseLengthVariation), furSample);
 
-    fragmentColor.a = heightSample.x * furSample * (1.0 - (float(layerIndex) / float(numberOfLayers) * 1.0));
+    // Finaly apply the thresholded noise texture to the alpha channel of the fragment, 
+    // this will create a surface that looks like fur.
+    fragmentColor.a = heightSample.x * furSample * (1.0 - (float(layerIndex) / float(numberOfLayers)));
 }

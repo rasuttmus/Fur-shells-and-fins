@@ -54,6 +54,10 @@ public:
 
     void setHairMapName(std::string s)       { mHairMapName = s; }
 
+    void setFurPatternScale(float ps)        { mFurPatternScale = ps; }
+
+    void setNoiseType(int nt)                { mNoiseType = nt; }
+
 private:
 
     void createTextureData();
@@ -91,9 +95,13 @@ private:
 
     float mCurrentTime = 0.0f;
 
+    float mFurPatternScale;
+
     unsigned int mNumberOfLayers;
 
     unsigned int mIndex;
+
+    int mNoiseType;
 
     glm::mat4 mRotationMatrix   = glm::mat4(1.0);
 
@@ -172,6 +180,10 @@ private:
     GLint currentTimeLoc;
 
     GLint windVelocityLoc;
+
+    GLint furPatternScaleLoc;
+
+    GLint noiseTypeLoc;
 
 
 	// Containers
