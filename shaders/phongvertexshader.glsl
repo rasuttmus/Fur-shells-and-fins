@@ -13,24 +13,26 @@ uniform mat4 MVLight;
 uniform vec3 lightPosition;
 
 out vec3 normal;
-out vec3 vertexPositionWorldSpace;
 out vec3 lightDirectionCameraSpace;
 out vec3 viewDirectionCameraSpace;
 out vec2 UV;
 
 void main() {
 
+	// Apply MVP matrix to vertex position
 	gl_Position = MVP * vec4(vertexPosition, 1.0);
 
+	// Set UV coordinate, which will be passed to the fragment shader
 	UV = uvCoordinate;
 
-	vertexPositionWorldSpace = vec3(M * vec4(vertexPosition, 1.0));
-
+	// Compute view direction, will be used in the phong shading model
 	vec3 vertexPositionCameraSpace = vec3(V * M * vec4(vertexPosition, 1.0));
 	viewDirectionCameraSpace = vec3(0.0, 0.0, 0.0) - vertexPositionCameraSpace;
 
+	// Compute light directino, will also be used in the phong model
 	vec3 lightPostionCameraSpace = vec3(V * vec4(lightPosition, 1.0));
 	lightDirectionCameraSpace = lightPostionCameraSpace + viewDirectionCameraSpace;
 
+	// Transform normal
 	normal = vec3(transpose(inverse(V * M)) * vec4(vertexNormal, 1.0));
 }
