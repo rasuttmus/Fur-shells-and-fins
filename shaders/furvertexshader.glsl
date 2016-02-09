@@ -107,9 +107,6 @@ void main() {
     // This is used in the fragment shader to evaluate the noise function that varies the length of the fur.
     vertexPositionModelSpace = vertexPosition;
 
-    // Get a sample from the hair map, determines if there should be fur or not
-    vec3 heightSample = texture(hairMapSampler, UV).rgb;
-
     // Get UV coordinate, since we need this to sample from the texture in the fragment shader
     UV = uvCoordinate;
 
