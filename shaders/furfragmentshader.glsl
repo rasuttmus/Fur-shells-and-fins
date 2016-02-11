@@ -313,18 +313,22 @@ void main() {
     worleyColor = darkSpotWorley;
 
     // The simplex noise pattern for the fur
-    float simplexSample   = snoise(UV3D * 0.2);
-    float simplexColor    = smoothstep(0.3, 0.1, simplexSample);
+    float simplexSample = snoise(UV3D * 0.2);
+    float simplexColor  = smoothstep(0.3, 0.1, simplexSample);
 
-    // Depending on the GUI input, pick the according noise function (simplex or worley)
-    float noise = (noiseType == 0) ? simplexColor : worleyColor;
+    // Depending on the GUI input, pick the according noise function (simplex or worley),
+    // This hack is not the most awesome thing I've ever created, but atleast it's faster than
+    // evaluating both noise functions and the then pick the correct color.
+    vec2  noiseSample = (noiseType == 0) ? vec2(snoise(UV3D * 0.2), 0.0) : cellular(UV3D * 0.2);
+    float noiseColor  = (noiseType == 0) ? (noiseSample.x - noiseSample.y) : (noiseSample.y - noiseSample.x);
+    noiseColor        = (noiseType == 0) ? smoothstep(0.3, 0.1, noiseColor) : smoothstep(0.95, 0.8, noiseColor * 10.0);
 
     // Apply shading, the diffuse term is determined by the index of the current shell
     fragmentColor.rgb = ambientColor * color
                       + diffuseColor * color * lightPower * cosTheta * ( 2.5 * float(layerIndex) / float(numberOfLayers) );
 
     // Apply the worley noise color
-    fragmentColor.rgb *= (noise * 0.8) + 0.2;
+    fragmentColor.rgb *= (noiseColor * 0.8) + 0.2;
 
     // Get value from fur noise texture
     float furSample = texture(textureSampler, UV).r;

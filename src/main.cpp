@@ -83,7 +83,7 @@ int main() {
 
     loadGeometryData();
 
-    std::cout << "\nPre-processing..." << std::endl;
+    std::cout << "\nPre-processing...\n" << std::endl;
 
     torus  = new Geometry(geometryData["torus"],  glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f);
     sphere = new Geometry(geometryData["sphere"], glm::vec3(0.5f, 0.4f, 0.3f), 24, 0.15f, false);
