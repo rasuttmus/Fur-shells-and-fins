@@ -63,7 +63,7 @@ Geometry * bunny = nullptr;
 Geometry * teapot = nullptr;
 
 // Global variables
-std::string windowTitle = "Fur - Shells and Fins";
+std::string windowTitle = "Rasmus Volumetric Fur Demo";
 
 std::map<std::string, std::vector<std::string>> geometryData;
 
@@ -98,6 +98,9 @@ int main() {
     scene->addGeometry(monkey);
     scene->addGeometry(bunny);
     scene->addGeometry(teapot);
+
+    scene->addShaderPair("shaders/phongvertexshader.glsl", "shaders/phongfragmentshader.glsl");
+    scene->addShaderPair("shaders/furvertexshader.glsl", "shaders/furfragmentshader.glsl");
 
     // Initialize scene
     scene->initialize();

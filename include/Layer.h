@@ -26,13 +26,9 @@ public:
 
 	~Layer();
 
-	void initialize(glm::vec3, glm::vec3);
+	void initialize(glm::vec3);
 
-	void render(std::vector<glm::mat4>, float, float);
-
-    void update(float);
-
-    void generateTexture(std::vector<GLubyte>, int, int);
+	void render(std::vector<glm::mat4>, float, float, glm::vec3);
 
     glm::vec3 getColor()                     { return mMaterial.color; }
 
@@ -50,19 +46,19 @@ public:
 
     void setCurrentTime(float t)             { mCurrentTime = t; }
 
-    void setHairMapID(GLuint t)              { hairMapID = t; }
-
     void setHairMapName(std::string s)       { mHairMapName = s; }
 
     void setFurPatternScale(float ps)        { mFurPatternScale = ps; }
 
     void setNoiseType(int nt)                { mNoiseType = nt; }
 
+    void setNoiseTextureID(GLuint ID)        { noiseTextureID = ID; }
+
+    void setHairMapID(GLuint t)              { hairMapID = t; }
+
+    void setShaderProgram(GLuint sp)         { shaderProgram = sp; }
+
 private:
-
-    void createTextureData();
-
-    GLuint loadTexture(const std::string filename, int &width, int &height);
 
 	// Structs
 
@@ -139,17 +135,9 @@ private:
 
     GLint MVPLoc;
 
-    GLint MVLoc;
-
     GLint MLoc;
 
     GLint VLoc;
-    
-    GLint MVLightLoc;
-    
-    GLint NMLoc;
-
-    GLint RLoc;
     
     GLint lightPosLoc;
 
@@ -193,8 +181,6 @@ private:
 	std::vector<glm::vec2> mRenderUvs;
 
 	std::vector<glm::vec3> mRenderNormals;
-
-    std::vector<GLubyte> mTextureData;
 };
 
 #endif // LAYER_H

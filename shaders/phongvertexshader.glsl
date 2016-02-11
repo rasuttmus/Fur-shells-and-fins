@@ -6,11 +6,10 @@ layout(location = 1) in vec2 uvCoordinate;
 layout(location = 2) in vec3 vertexNormal;
 
 uniform mat4 MVP;
-uniform mat4 MV;
 uniform mat4 M;
 uniform mat4 V;
-uniform mat4 MVLight;
 uniform vec3 lightPosition;
+uniform vec3 cameraPosition;
 
 out vec3 normal;
 out vec3 lightDirectionCameraSpace;
@@ -27,7 +26,7 @@ void main() {
 
 	// Compute view direction, will be used in the phong shading model
 	vec3 vertexPositionCameraSpace = vec3(V * M * vec4(vertexPosition, 1.0));
-	viewDirectionCameraSpace = vec3(0.0, 0.0, 0.0) - vertexPositionCameraSpace;
+	viewDirectionCameraSpace = cameraPosition - vertexPositionCameraSpace;
 
 	// Compute light directino, will also be used in the phong model
 	vec3 lightPostionCameraSpace = vec3(V * vec4(lightPosition, 1.0));

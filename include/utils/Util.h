@@ -6,16 +6,16 @@
 
 // Indices for matrices in the scene and data of the geometry
 #define I_MVP 		0
-#define I_MV  		1
-#define I_M  		2
+#define I_M  		1
 #define I_V  		2
-#define I_MV_LIGHT  3
-#define I_NM		4
 
 #define I_FILENAME	0
 #define I_TEXTURE	1
 #define I_HAIRMAP	2
 #define I_TEXSIZE	3
+
+#define I_PHONG		0
+#define I_FUR		1
 
 #include <glm/vec3.hpp>
 

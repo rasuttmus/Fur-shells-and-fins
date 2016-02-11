@@ -32,15 +32,19 @@ Geometry::~Geometry() {
 }
 
 
-void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
+void Geometry::initialize(glm::vec3 lightPosition) {
 
     // Generate fur noise texture
-    generateTexture();
+    generateNoiseTexture();
 
     // Generate skin texture
     std::string skinTexturename = PATH_TEX + mTextureName + FILE_NAME_PNG;
     int skinTextureHeight, skinTextureWidth;
     skinTextureID = loadTexture(skinTexturename, skinTextureWidth, skinTextureHeight);
+
+    std::string hairMapTexturename = PATH_TEX + mHairMapName + FILE_NAME_PNG;
+    int hairMapHeight, hairMapWidth;
+    hairMapID = loadTexture(hairMapTexturename, hairMapWidth, hairMapHeight);
 
     // Then create fur layers since they use the render data from the geometry
     createFurLayers();
@@ -50,15 +54,12 @@ void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
     glGenVertexArrays(1, &vertexArrayID);
     glBindVertexArray(vertexArrayID);
 
-    shaderProgram = LoadShaders("shaders/phongvertexshader.glsl", "shaders/phongfragmentshader.glsl");
+    //shaderProgram = LoadShaders("shaders/phongvertexshader.glsl", "shaders/phongfragmentshader.glsl");
 
     // Bind shader variables (uniforms) to indices
     MVPLoc          = glGetUniformLocation(shaderProgram, "MVP");
-    MVLoc           = glGetUniformLocation(shaderProgram, "MV");
     MLoc            = glGetUniformLocation(shaderProgram, "M");
     VLoc            = glGetUniformLocation(shaderProgram, "V");
-    MVLightLoc      = glGetUniformLocation(shaderProgram, "MVLight");
-    NMLoc           = glGetUniformLocation(shaderProgram, "NM");
     lightPosLoc     = glGetUniformLocation(shaderProgram, "lightPosition");
     cameraPosLoc    = glGetUniformLocation(shaderProgram, "cameraPosition");
     colorLoc        = glGetUniformLocation(shaderProgram, "color");
@@ -72,7 +73,6 @@ void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
     skinTextureLoc  = glGetUniformLocation(shaderProgram, "skinTextureSampler");
 
     glUniform3f(lightPosLoc,  lightPosition[0],  lightPosition[1],  lightPosition[2]);
-    glUniform3f(cameraPosLoc, cameraPosition[0], cameraPosition[1], cameraPosition[2]);
 
 
     glGenBuffers(1, &vertexBuffer);
@@ -119,14 +119,16 @@ void Geometry::initialize(glm::vec3 lightPosition, glm::vec3 cameraPosition) {
         reinterpret_cast<void*>(0)      // array buffer offset, 0
     );
 
-    for(std::vector<Layer *>::iterator it = mFurLayers.begin(); it != mFurLayers.end(); ++it)
-        (*it)->initialize(lightPosition, cameraPosition);
+    for(std::vector<Layer *>::iterator it = mFurLayers.begin(); it != mFurLayers.end(); ++it) {
+        (*it)->setShaderProgram(furShaderProgram);
+        (*it)->initialize(lightPosition);
+    }
 
     std::cout << "\nGeometry initialized!\n";
 }
 
 
-void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower, float windVelocity) {
+void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower, float windVelocity, glm::vec3 cameraPosition) {
 
     glEnable( GL_CULL_FACE );
     glEnable(GL_DEPTH_TEST);
@@ -139,11 +141,9 @@ void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower, f
 
     // Pass data to shaders as uniforms
     glUniformMatrix4fv(MVPLoc,          1,                       GL_FALSE,              &matrices[I_MVP][0][0]);
-    glUniformMatrix4fv(MVLoc,           1,                       GL_FALSE,              &matrices[I_MV][0][0]);
     glUniformMatrix4fv(MLoc,            1,                       GL_FALSE,              &matrices[I_M][0][0]);
     glUniformMatrix4fv(VLoc,            1,                       GL_FALSE,              &matrices[I_V][0][0]);
-    glUniformMatrix4fv(MVLightLoc,      1,                       GL_FALSE,              &matrices[I_MV_LIGHT][0][0]);
-    glUniformMatrix4fv(NMLoc,           1,                       GL_FALSE,              &matrices[I_NM][0][0]);
+    glUniform3f(       cameraPosLoc,    cameraPosition[0],       cameraPosition[1],     cameraPosition[2]);
     glUniform3f(       colorLoc,        mMaterial.color[0],      mMaterial.color[1],    mMaterial.color[2]);
     glUniform3f(       ambientLoc,      mMaterial.ambient[0],    mMaterial.ambient[1],  mMaterial.ambient[2]);
     glUniform3f(       diffuseLoc,      mMaterial.diffuse[0],    mMaterial.diffuse[1],  mMaterial.diffuse[2]);
@@ -153,7 +153,6 @@ void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower, f
     glUniform1f(       shinynessLoc,    mMaterial.shinyness);
     glUniform1f(       lightPowerLoc,   lightSourcePower);
 
-    
     // Rebind vertex, uv, and normal data, since everything is updated every frame
     glBindVertexArray(vertexArrayID);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -175,9 +174,8 @@ void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower, f
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(2);
 
-
     for(std::vector<Layer *>::iterator it = mFurLayers.begin(); it != mFurLayers.end(); ++it)
-        (*it)->render(matrices, lightSourcePower, windVelocity);
+        (*it)->render(matrices, lightSourcePower, windVelocity, cameraPosition);
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
@@ -198,14 +196,13 @@ void Geometry::updateFur(float dt) {
         (*it)->setColor(mMaterial.furColor);
         (*it)->setFurPatternScale(mMaterial.furPatternScale);
         (*it)->setNoiseType(mNoiseType);
-        (*it)->update(dt);
     }
 }
 
 void Geometry::setScreenCoordMovement(glm::vec2 m) {
 
     for(std::vector<Layer *>::iterator it = mFurLayers.begin(); it != mFurLayers.end(); ++it)
-        (*it)->setScreenCoordMovement(m*0.5f);
+        (*it)->setScreenCoordMovement(m * 0.5f);
 }
 
 
@@ -236,15 +233,15 @@ void Geometry::createFurLayers() {
         mFurLayers[i] = new Layer(mRenderVerts, mRenderUvs, mRenderNormals, offset += stepLength, mNumberOfLayers, i);
         mFurLayers[i]->setFurNoiseLengthVariation(mFurNoiseLengthVariation);
         mFurLayers[i]->setFurNoiseSampleScale(mFurNoiseSampleScale);
-        mFurLayers[i]->generateTexture(mTextureData, mTextureWidth, mTextureHeight);
+        mFurLayers[i]->setNoiseTextureID(noiseTextureID);
+        mFurLayers[i]->setHairMapID(hairMapID);
         mFurLayers[i]->setHairMapName(mHairMapName);
     }
 }
 
 
-void Geometry::generateTexture() {
+void Geometry::generateNoiseTexture() {
 
-    //mTextureWidth = mTextureHeight = 1024;
     unsigned int x = 0, y = 0;
     float noiseScale = 1.0f;
 
@@ -264,6 +261,13 @@ void Geometry::generateTexture() {
 
         x++;
     }
+
+    // Generate OpenGL texture
+    glGenTextures(1, &noiseTextureID);
+    glBindTexture(GL_TEXTURE_2D, noiseTextureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mTextureWidth, mTextureHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, &mTextureData[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 

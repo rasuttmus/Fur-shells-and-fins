@@ -6,13 +6,13 @@
 #include <map>
 #include <algorithm>
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/gtc/matrix_transform.hpp>
+//#include <GL/glew.h>
+//#include <GLFW/glfw3.h>
+//#include <glm/gtc/matrix_transform.hpp>
 
-#include "utils/Util.h"
+//#include "utils/Util.h"
 #include "utils/ObjectLoader.h"
-#include "utils/Shader.h"
+//#include "utils/Shader.h"
 #include "../include/Layer.h"
 
 
@@ -24,9 +24,9 @@ public:
 
     ~Geometry();
 
-    void      initialize(glm::vec3, glm::vec3);
+    void      initialize(glm::vec3);
 
-    void      render(std::vector<glm::mat4>, float, float);
+    void      render(std::vector<glm::mat4>, float, float, glm::vec3);
 
     void      updateFur(float);
 
@@ -92,6 +92,10 @@ public:
 
     void      setNoiseType(int nt)                 { mNoiseType = nt; }
 
+    void      setShaderProgram(GLuint sp)          { shaderProgram = sp; }
+
+    void      setFurShaderProgram(GLuint sp)       { furShaderProgram = sp; }
+
 private:
 
     // Functions
@@ -100,7 +104,9 @@ private:
 
     void createFurLayers();
 
-    void generateTexture();
+    void generateNoiseTexture();
+
+    void generateHairMap();
 
     GLuint loadTexture(const std::string filename, int &width, int &height);
 
@@ -176,24 +182,24 @@ private:
 
     GLuint shaderProgram;
 
+    GLuint furShaderProgram;
+
     GLuint skinTextureID;
     
     GLuint skinTextureLoc;
+
+    GLuint noiseTextureID;
+
+    GLuint hairMapID;
 
 
     // Uniform indices
 
     GLint MVPLoc;
-    
-    GLint MVLoc;
 
     GLint MLoc;
 
     GLint VLoc;
-    
-    GLint MVLightLoc;
-    
-    GLint NMLoc;
     
     GLint lightPosLoc;
 

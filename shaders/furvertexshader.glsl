@@ -6,12 +6,10 @@ layout(location = 1) in vec2 uvCoordinate;
 layout(location = 2) in vec3 vertexNormal;
 
 uniform mat4  MVP;
-uniform mat4  MV;
 uniform mat4  M;
 uniform mat4  V;
-uniform mat4  PhysicalRotationMatrix;
-uniform mat4  MVLight;
 uniform vec3  lightPosition;
+uniform vec3  cameraPosition;
 uniform float layerOffset;
 uniform float currentTime;
 uniform float windVelocity;
@@ -117,7 +115,7 @@ void main() {
     windDirection.y    = cos(currentTime * 2.0 + sin(snoise(vec2(currentTime * 0.05, currentTime)) * 0.5)) * 8.0 * windVelocity;
 
     // How much should we allow the shell to be displaced?
-    float displacementFactor = pow(float(layerIndex) / float(numberOfLayers) * 0.5, 3.0) * layerOffset;
+    float displacementFactor = pow(0.5 * (float(layerIndex) / float(numberOfLayers)), 3.0) * layerOffset;
     vec3 displacement = windDirection * displacementFactor;
 
     // Determine how much the vertex should be moved in the normal direction
@@ -125,7 +123,7 @@ void main() {
 
     // Apply transforms to the vertex
     gl_Position    = (MVP) * vec4(surfaceAdvection, 1.0);
-    gl_Position.y -= 9.82 * displacementFactor;
+    gl_Position.xyz += gravity * displacementFactor;
     gl_Position.x += windDirection.x * displacementFactor;
     gl_Position.y += windDirection.y * displacementFactor;
 
@@ -134,7 +132,7 @@ void main() {
 
     // Compute some directions and postions for the diffuse shading
     vec3 vertexPositionCameraSpace = vec3(V * M * vec4(vertexPosition, 1.0));
-    vec3 viewDirectionCameraSpace  = vec3(0.0, 0.0, 0.0) - vertexPositionCameraSpace;
+    vec3 viewDirectionCameraSpace  = cameraPosition - vertexPositionCameraSpace;
     vec3 lightPostionCameraSpace   = vec3(V * vec4(lightPosition, 1.0));
     lightDirectionCameraSpace      = lightPostionCameraSpace + viewDirectionCameraSpace;
 

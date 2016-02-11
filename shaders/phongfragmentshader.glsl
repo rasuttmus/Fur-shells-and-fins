@@ -1,6 +1,5 @@
 #version 330 core
 
-uniform mat4  	  NM;
 uniform vec3  	  cameraPosition;
 uniform vec3  	  color;
 uniform vec3  	  ambientColor;
@@ -22,11 +21,11 @@ out vec4 fragmentColor;
 void main() {
 
 	// Compute vectors and angle for the shading
-	vec3 n         = normalize(normal);
-	vec3 l 		   = normalize(lightDirectionCameraSpace);
+	vec3  n        = normalize(normal);
+	vec3  l 	   = normalize(lightDirectionCameraSpace);
 	float cosTheta = clamp(dot(n, l), 0, 1);
-	vec3 E 		   = normalize(viewDirectionCameraSpace);
-	vec3 R 		   = reflect(-l, n);
+	vec3  E 	   = normalize(viewDirectionCameraSpace);
+	vec3  R 	   = reflect(-l, n);
 	float cosAlpha = clamp(dot(E, R), 0, 1);
 
 	// Get color sample from our texture, this is the skin color

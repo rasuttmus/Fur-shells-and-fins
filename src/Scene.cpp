@@ -30,8 +30,14 @@ void Scene::initialize() {
 	// Light source position
 	mLightSource.pos = glm::vec3(0.0f, 5.0f, 0.0f);
 
-	for(std::vector<Geometry *>::iterator it = mGeometries.begin(); it != mGeometries.end(); ++it)
-		(*it)->initialize(mLightSource.pos, mCamera->getPosition());
+	GLuint phongID = LoadShaders(mShaderPrograms[I_PHONG].first.c_str(), mShaderPrograms[I_PHONG].second.c_str());
+	GLuint furID   = LoadShaders(mShaderPrograms[I_FUR].first.c_str(),   mShaderPrograms[I_FUR].second.c_str());
+
+	for(std::vector<Geometry *>::iterator it = mGeometries.begin(); it != mGeometries.end(); ++it) {
+		(*it)->setShaderProgram(phongID);
+		(*it)->setFurShaderProgram(furID);
+		(*it)->initialize(mLightSource.pos);
+	}
 
 	std::cout << "\nScene initialized!\n";
 }
@@ -47,19 +53,13 @@ void Scene::render() {
 
 	mMatrices[I_MVP] 	  = mCamera->getProjectionMatrix() * mCamera->getViewMatrix() * mCamera->getModelMatrix();
 
-	mMatrices[I_MV] 	  = mCamera->getViewMatrix() * mCamera->getModelMatrix();
-
 	mMatrices[I_M] 	  	  = mCamera->getModelMatrix();
 
 	mMatrices[I_V] 	  	  = mCamera->getViewMatrix();
 
-	mMatrices[I_MV_LIGHT] = mCamera->getViewMatrix() * mCamera->getModelMatrix();
-
-	mMatrices[I_NM]		  = glm::inverseTranspose(glm::mat4(mCamera->getViewMatrix() * mCamera->getModelMatrix()));
-
 	for(std::vector<Geometry *>::iterator it = mGeometries.begin(); it != mGeometries.end(); ++it) {
 		if((*it)->getShallRender())
-			(*it)->render(mMatrices, mLightSource.power, mWindVelocity);
+			(*it)->render(mMatrices, mLightSource.power, mWindVelocity, mCamera->getPosition());
 	}
 }
 

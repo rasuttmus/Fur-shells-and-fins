@@ -20,23 +20,25 @@ public:
 
 	void   update(float);
 
-	void   addGeometry(Geometry * G) 			  { mGeometries.push_back(G); }
+	void   addGeometry(Geometry * G) 			  		 { mGeometries.push_back(G); }
 
 	void   updateCameraPosition(double, double);
 
     void   updateCameraZoom(double, double);
     
-    void   mousePress(double x, double y) 	   	  { mCamera->dragStart(x, y); }
+    void   mousePress(double x, double y) 	   	  		 { mCamera->dragStart(x, y); }
     
-    void   mouseRelease() 					      { mCamera->dragEnd(); }
+    void   mouseRelease() 					      		 { mCamera->dragEnd(); }
 
     void   resetCamera();
 
-    float &getLightSourcePower() 			      { return mLightSource.power; }
+    float &getLightSourcePower() 			      		 { return mLightSource.power; }
 
-    float &getWindVelocity()	 			      { return mWindVelocity; }
+    float &getWindVelocity()	 			      		 { return mWindVelocity; }
 
     void   setCurrentTime(float t);
+
+    void   addShaderPair(std::string vs, std::string fs) { mShaderPrograms.push_back(std::make_pair(vs, fs)); }
 
 private:
 
@@ -52,6 +54,8 @@ private:
 	std::vector<Geometry *> mGeometries;
 
 	std::vector<glm::mat4> mMatrices;
+
+	std::vector<std::pair<std::string, std::string> > mShaderPrograms;
 
 
 	// Structs
