@@ -6,13 +6,7 @@
 #include <map>
 #include <algorithm>
 
-//#include <GL/glew.h>
-//#include <GLFW/glfw3.h>
-//#include <glm/gtc/matrix_transform.hpp>
-
-//#include "utils/Util.h"
 #include "utils/ObjectLoader.h"
-//#include "utils/Shader.h"
 #include "../include/Layer.h"
 
 
@@ -20,7 +14,12 @@ class Geometry {
 
 public:
 
-    Geometry(std::vector<std::string>, glm::vec3 c = glm::vec3(1.0f, 1.0f, 1.0f), unsigned int n = 4, float l = 0.5f, bool r = true);
+    Geometry(std::vector<std::string>, 
+             glm::vec3 c = glm::vec3(1.0f, 1.0f, 1.0f), 
+             unsigned int n = 24, 
+             float l = 0.15f, 
+             bool r = true
+        );
 
     ~Geometry();
 
@@ -30,7 +29,10 @@ public:
 
     void      updateFur(float);
 
-    GLuint    loadTexturePNG(const std::string, int &, int &);
+    GLuint    loadTexturePNG(const std::string, 
+                             int &, 
+                             int &
+        );
 
     glm::vec3 getColor()                           { return mMaterial.color; }
 
@@ -223,16 +225,6 @@ private:
 
 
     // Containers
-
-    //std::map<glm::vec3, unsigned int> mUniqueVerts;
-
-    //std::map<glm::vec2, unsigned int> mUniqueUvs;
-
-    //std::vector<Face> mFaces;
-
-    //std::vector<Vertex> mVerts;
-
-    //std::vector<glm::vec2> mUvs;
 
     std::vector<glm::vec3> mRenderVerts;
 

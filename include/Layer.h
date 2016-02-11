@@ -22,15 +22,34 @@ class Layer {
 
 public:
 
-	Layer(std::vector<glm::vec3>, std::vector<glm::vec2>, std::vector<glm::vec3>, float, unsigned int, unsigned int, glm::vec3 c = glm::vec3(0.71, 0.55, 0.34));
+	Layer(std::vector<glm::vec3>, 
+          std::vector<glm::vec2>, 
+          std::vector<glm::vec3>, 
+          float, 
+          unsigned int, 
+          unsigned int, 
+          glm::vec3 c = glm::vec3(0.71, 0.55, 0.34)
+        );
 
 	~Layer();
 
 	void initialize(glm::vec3);
 
-	void render(std::vector<glm::mat4>, float, float, glm::vec3);
+	void render(std::vector<glm::mat4>, 
+                float, 
+                float, 
+                glm::vec3
+        );
 
     glm::vec3 getColor()                     { return mMaterial.color; }
+
+    GLint getNoiseTextureLoc()               { return noiseTextureLoc; }
+
+    GLint getHairMapLoc()                    { return hairMapLoc; }
+
+    GLint getNoiseTextureID()                { return noiseTextureID; }
+
+    GLint getHairMapID()                     { return hairMapID; }
 
     void setOffset(float o)                  { mOffset = o; }
 
@@ -57,6 +76,14 @@ public:
     void setHairMapID(GLuint t)              { hairMapID = t; }
 
     void setShaderProgram(GLuint sp)         { shaderProgram = sp; }
+
+    void setNoiseTextureLoc(GLint Loc)       { noiseTextureLoc = Loc; }
+
+    void setHairMapLoc(GLint Loc)            { hairMapLoc = Loc; }
+
+    void setNoiseTextureID(GLint ID)         { noiseTextureID = ID; }
+
+    void setHairMapID(GLint ID)              { hairMapID = ID; }
 
 private:
 
@@ -120,13 +147,9 @@ private:
 
     GLuint hairMapID;
 
-    GLuint skinTextureID;
-
     GLuint noiseTextureLoc;
 
     GLuint hairMapLoc;
-
-    GLuint skinTextureLoc;
 
     GLuint shaderProgram;
 

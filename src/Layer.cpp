@@ -108,17 +108,6 @@ void Layer::initialize(glm::vec3 lightPosition) {
 
 void Layer::render(std::vector<glm::mat4> matrices, float lightSourcePower, float windVelocity, glm::vec3 cameraPosition) {
 
-    glUseProgram(shaderProgram);
-
-    // Set active tex-unit and bind texture
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, noiseTextureID);
-    glUniform1i(noiseTextureLoc, 1);
-
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, hairMapID);
-    glUniform1i(hairMapLoc, 2);
-
     float rotationScaleFactor = (float)pow(((float)mIndex / (float)mNumberOfLayers), 3.0f);
     mRotationMatrix = glm::rotate(glm::mat4(1.0), static_cast<float>(-mScreenCoordMovement.x * M_PI / 180.0f) * rotationScaleFactor, glm::vec3(0.0f, 1.0f, 0.0f));
     mRotationMatrix = glm::rotate(mRotationMatrix, static_cast<float>(-mScreenCoordMovement.y * M_PI / 180.0f) * rotationScaleFactor, glm::vec3(1.0f, 0.0f, 0.0f));

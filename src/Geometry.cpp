@@ -54,7 +54,6 @@ void Geometry::initialize(glm::vec3 lightPosition) {
     glGenVertexArrays(1, &vertexArrayID);
     glBindVertexArray(vertexArrayID);
 
-    //shaderProgram = LoadShaders("shaders/phongvertexshader.glsl", "shaders/phongfragmentshader.glsl");
 
     // Bind shader variables (uniforms) to indices
     MVPLoc          = glGetUniformLocation(shaderProgram, "MVP");
@@ -174,8 +173,28 @@ void Geometry::render(std::vector<glm::mat4> matrices, float lightSourcePower, f
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(2);
 
-    for(std::vector<Layer *>::iterator it = mFurLayers.begin(); it != mFurLayers.end(); ++it)
-        (*it)->render(matrices, lightSourcePower, windVelocity, cameraPosition);
+
+    GLint noiseLoc = mFurLayers.front()->getNoiseTextureLoc();
+    GLint hairLoc  = mFurLayers.front()->getHairMapLoc();
+    GLint noiseID  = mFurLayers.front()->getNoiseTextureID();
+    GLint hairID   = mFurLayers.front()->getHairMapID();
+
+    if(mFurLayers.size() > 0) {
+
+        glUseProgram(furShaderProgram);
+
+        // Set active tex-unit and bind texture
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, noiseID);
+        glUniform1i(noiseLoc, 1);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, hairID);
+        glUniform1i(hairLoc, 2);
+
+        for(std::vector<Layer *>::iterator it = mFurLayers.begin(); it != mFurLayers.end(); ++it)
+            (*it)->render(matrices, lightSourcePower, windVelocity, cameraPosition);
+    }
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
